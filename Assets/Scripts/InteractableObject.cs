@@ -15,14 +15,10 @@ public class InteractableObject : MonoBehaviour
     [SerializeField] bool isUsed;
     [SerializeField] bool hasBeenUsed;
     [SerializeField] UnityEvent Event;
-    [SerializeField] string destination;
     // Start is called before the first frame update
     void Start()
     {
         toucheEInstance = Instantiate(toucheE);
-        GetComponent<Voyager>().destination = destination;
-
-
     }
 
     // Update is called once per frame
