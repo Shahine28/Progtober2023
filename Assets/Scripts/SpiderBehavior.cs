@@ -8,8 +8,15 @@ public class SpiderBehavior : MonoBehaviour
     [Header("Player Detection")]
     public float ZoneDegat;
     public float ZoneSuivie;
-    [SerializeField] private bool isSetUp;
     public bool seePlayer;
+    bool hasSeenPlayer;
+    bool _LookRight;
+    [SerializeField] Rigidbody2D rb;
+    [SerializeField] private bool isSetUp;
+
+    [Header("Animation")]
+    [SerializeField] Animator animator;
+    
 
     [Header("Spider Weapon")]
     [SerializeField] GameObject bulletPrefab;
@@ -21,82 +28,110 @@ public class SpiderBehavior : MonoBehaviour
     void Start()
     {
         cadenceTmp = cadence;
+        GetComponent<Pathfinding.AIDestinationSetter>().target = GameObject.FindGameObjectWithTag("Player").transform;
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (seePlayer)
-        {
-            if (gameObject.GetComponent<Pathfinding.AIDestinationSetter>() != null)
-            {
-                gameObject.GetComponent<Pathfinding.AIDestinationSetter>().enabled = true;
-            }
-        }
-        else if (!seePlayer) 
-        {
-            if (gameObject.GetComponent<Pathfinding.AIDestinationSetter>() != null)
-            {
-                gameObject.GetComponent<Pathfinding.AIDestinationSetter>().enabled = false;
-            } 
-        }
-            
+       Debug.Log(rb.velocity.sqrMagnitude);
         playerDetection();
-        
+        animator.SetBool("isSetIUp",isSetUp);
+        animator.SetBool("hasSeenPlayer", hasSeenPlayer);
+        /*spiderMovement();*/
+
     }
 
     private void playerDetection()
     {
-        Collider2D[] zoneDegat = Physics2D.OverlapCircleAll(transform.position, ZoneDegat);
-        if (zoneDegat.Length > 0)
-        {
-            foreach (Collider2D collision in zoneDegat)
-            {
-                if (collision.gameObject.tag == "Player")
-                {
-                    isSetUp = true;
-                    Vector2 direction = new Vector2(collision.transform.position.x - transform.position.x, collision.transform.position.y - transform.position.y);
-                    transform.up = direction;
-                    cadence -= Time.deltaTime;
-
-                    if (cadence <= 0)
-                    {
-                        Shoot();
-                        cadence = cadenceTmp;
-                    }
-
-                }
-                else isSetUp = false;
-            }
-        }
-        else
-        {
-            cadence = cadenceTmp;
-            isSetUp = false;
-        }
 
         Collider2D[] zoneSuivie = Physics2D.OverlapCircleAll(transform.position, ZoneSuivie);
-        if (zoneSuivie.Length > 0)
+        Collider2D[] zoneDegat = Physics2D.OverlapCircleAll(transform.position, ZoneDegat);
+
+
+        if (isInCollider(zoneSuivie, GameObject.FindGameObjectWithTag("Player")))
         {
-            foreach (Collider2D collision in zoneSuivie)
+            hasSeenPlayer = true;
+            seePlayer = true;
+        }
+        else if (!isInCollider(zoneSuivie, GameObject.FindGameObjectWithTag("Player")))
+        {
+            seePlayer = false;
+        }
+        if (isInCollider(zoneDegat, GameObject.FindGameObjectWithTag("Player")))
+        {
+            isSetUp = true;
+            seePlayer = true;
+            cadence -= Time.deltaTime;
+
+            if (cadence <= 0)
             {
-                if (collision.gameObject.tag == "Player")
-                {
-                    seePlayer = true;
-                }
-                else seePlayer = false;
+                StartCoroutine(Shoot());
+                cadence = cadenceTmp;
             }
         }
-        else seePlayer = false;
+        
 
+        if (!isInCollider(zoneDegat, GameObject.FindGameObjectWithTag("Player")))
+        {
+            isSetUp = false;
+            cadence = cadenceTmp;
+        }
 
+        if(hasSeenPlayer)
+        {
+            
+            GetComponent<Pathfinding.AIDestinationSetter>().enabled = true;
+            Tourner(gameObject);
+
+        }
 
     }
 
-    void Shoot()
+/*    void spiderMovement()
     {
+        if (seePlayer)
+        {
+            GetComponent<Pathfinding.AIDestinationSetter>().enabled = true;
+        }
+*//*        if (!seePlayer)
+        {
+           
+        }*//*
+    }*/
+
+    public void Tourner(GameObject obj)
+    {
+        if ((GameObject.FindGameObjectWithTag("Player").transform.position.x < transform.position.x && _LookRight) || (GameObject.FindGameObjectWithTag("Player").transform.position.x > transform.position.x && !_LookRight))
+        {
+            _LookRight = !_LookRight;
+            obj.transform.Rotate(0f, 180f, 0f);
+        }
+        else
+        {
+            obj.transform.Rotate(0f, 0f, 0f);
+        }
+    }
+
+    IEnumerator Shoot()
+    {
+        animator.SetBool("Attack", true);
+        yield return new WaitForSeconds(0.8f);
         GameObject Bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
         Bullet.GetComponent<Rigidbody2D>().AddForce(firePoint.up * fireForce, ForceMode2D.Force);
+        animator.SetBool("Attack",false);
+    }
+    bool isInCollider(Collider2D[] collider, GameObject gameObject)
+    {
+        foreach (Collider2D collider2D in collider)
+        {
+            if (collider2D.gameObject == gameObject)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void OnDrawGizmos()
@@ -106,6 +141,8 @@ public class SpiderBehavior : MonoBehaviour
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, ZoneSuivie);
     } 
+
+
 }
 
 
