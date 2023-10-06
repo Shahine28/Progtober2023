@@ -15,9 +15,8 @@ public class PlayerMovement : MonoBehaviour
     private Vector2 _smoothedMovementInput;
     private Vector2 _movementInputSmoothVelocity;
     [SerializeField] PlayerInput _playerInput;
-    private InputAction _jump;
     Vector2 moveDirection;
-    bool jump;
+  
 
     [Header("Dash")]
     [SerializeField] float dashSpeed = 10f;
@@ -45,15 +44,6 @@ public class PlayerMovement : MonoBehaviour
     {
         if (isDashing) return;
         Tourner();
-        if (jump && canDash)
-        {
-            jump = false;
-            StartCoroutine(Dash());
-        }
-        if (jump)
-        {
-            jump = false;
-        }
         moveDirection = new Vector2(_movementInput.x, _movementInput.y).normalized;
         
     }
@@ -68,26 +58,28 @@ public class PlayerMovement : MonoBehaviour
         _animator.SetFloat("Horizontal", _movementInput.x);
         _animator.SetFloat("Speed", _movementInput.sqrMagnitude);
     }
-    private void OnMove(InputValue inputValue)
+    public void OnMove(InputAction.CallbackContext context)
     {
-        _movementInput = inputValue.Get<Vector2>();
+        _movementInput = context.ReadValue<Vector2>();
     }
 
-    private void Jump(InputAction.CallbackContext context)
+    public void OnJump(InputAction.CallbackContext context)
     {
-        jump = true;
+        if (!context.performed) return;
+
+        if(canDash)
+        {
+            StartCoroutine(Dash());
+        }
     }
 
     private void OnEnable()
     {
-        _jump = _playerInput.Player.Jump;
-        _jump.Enable();
-
-        _jump.performed += Jump;
+        _playerInput.Player.Jump.Enable();
     }
     private void OnDisable()
     {
-        _jump.Disable();
+        _playerInput.Player.Jump.Disable();
     }
 
     void Tourner()

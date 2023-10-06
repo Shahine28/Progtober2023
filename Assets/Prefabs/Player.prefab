@@ -15,6 +15,9 @@ GameObject:
   - component: {fileID: 332375809775215334}
   - component: {fileID: 5063265021810473587}
   - component: {fileID: 8326504929952786342}
+  - component: {fileID: 5803677435772872872}
+  - component: {fileID: 8085693911100803036}
+  - component: {fileID: 3697729380970394605}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -213,9 +216,83 @@ CapsuleCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: -0.0039545298, y: 0.4935184}
+  m_Size: {x: 0.54431987, y: 1.1873418}
+  m_Direction: 0
+--- !u!61 &5803677435772872872
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5472694611449320015}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.018265903, y: -0.4803959}
-  m_Size: {x: 0.7167293, y: 1.2208674}
-  m_Direction: 0
+  m_Offset: {x: -0.0025624037, y: -0.032030016}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.17}
+    oldSize: {x: 0.8125, y: 1.3125}
+    newSize: {x: 1, y: 1}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 0.5682156, y: 0.13619834}
+  m_EdgeRadius: 0
+--- !u!114 &8085693911100803036
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5472694611449320015}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8f6df7134a4fe34e8c1c5854c5c64b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  boxCollider: {fileID: 5803677435772872872}
+  capsuleCollider: {fileID: 8326504929952786342}
+  Gold: 0
+  coinSTR: {fileID: 0}
+--- !u!114 &3697729380970394605
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5472694611449320015}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff733870296229e47a98d3711a6e7195, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cliked: 0
