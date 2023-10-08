@@ -18,7 +18,11 @@ public class Coin : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        coinSTR.text = Gold.ToString();
+        if (coinSTR != null)
+        {
+            coinSTR.text = Gold.ToString();
+        }
+            
     }
 
 /*    private void OnCollisionEnter2D(Collision2D collision)

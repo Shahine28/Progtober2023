@@ -7,6 +7,10 @@ using UnityEngine.InputSystem;
 public class PlayerAttack : MonoBehaviour
 {
     [SerializeField] PlayerInput _playerInput;
+    [SerializeField] Animator _animator;
+    [SerializeField] Transform _attackPoint;
+    [SerializeField] float _attackRange;
+    [SerializeField] LayerMask _enemyLayers;
     // Update is called once per frame
     void Awake()
     {
@@ -16,18 +20,30 @@ public class PlayerAttack : MonoBehaviour
     {
   
     }
+    void Attack() 
+    {
+        _animator.SetTrigger("Attack");
+        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(_attackPoint.position, _attackRange, _enemyLayers);
+        foreach(Collider2D enemy in hitEnemies)
+        {
+            Debug.Log("We hit "+ enemy.gameObject.name);
+        }
+    }
 
-    public void Attack(InputAction.CallbackContext context)
+    public void LeftCLick(InputAction.CallbackContext context)
     {
         if (context.performed)
         {
-            Debug.Log("J'appuie");
+            /*Debug.Log("J'appuie");*/
+            Attack();
+            
         }
         else if (context.canceled)
         {
-            Debug.Log("Je relache");
+            /*Debug.Log("Je relache");*/
         }
     }
+
     private void OnEnable()
     {
         _playerInput.Player.Fire.Disable();
@@ -38,4 +54,14 @@ public class PlayerAttack : MonoBehaviour
         _playerInput.Player.Fire.Disable();
         
     }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (_attackPoint == null) return;
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(_attackPoint.position, _attackRange);
+    }
+
+
 }
+
