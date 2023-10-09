@@ -39,7 +39,8 @@ public class SpiderBehavior : MonoBehaviour
         playerDetection();
         animator.SetBool("isSetIUp",isSetUp);
         animator.SetBool("hasSeenPlayer", hasSeenPlayer);
-        /*spiderMovement();*/
+        spiderMovement();
+
 
     }
 
@@ -89,38 +90,44 @@ public class SpiderBehavior : MonoBehaviour
 
     }
 
-/*    void spiderMovement()
+    void spiderMovement()
     {
-        if (seePlayer)
+        if (seePlayer && !GetComponent<EnemyHealth>().isDead)
         {
             GetComponent<Pathfinding.AIDestinationSetter>().enabled = true;
         }
-*//*        if (!seePlayer)
+        else if (!seePlayer || GetComponent<EnemyHealth>().isDead)
         {
-           
-        }*//*
-    }*/
+            GetComponent<Pathfinding.AIDestinationSetter>().enabled = false;
+        }
+    }
 
     public void Tourner(GameObject obj)
     {
-        if ((GameObject.FindGameObjectWithTag("Player").transform.position.x < transform.position.x && _LookRight) || (GameObject.FindGameObjectWithTag("Player").transform.position.x > transform.position.x && !_LookRight))
+        if (!gameObject.GetComponent<EnemyHealth>().isDead) 
         {
-            _LookRight = !_LookRight;
-            obj.transform.Rotate(0f, 180f, 0f);
-        }
-        else
-        {
-            obj.transform.Rotate(0f, 0f, 0f);
+            if ((GameObject.FindGameObjectWithTag("Player").transform.position.x < transform.position.x && _LookRight) || (GameObject.FindGameObjectWithTag("Player").transform.position.x > transform.position.x && !_LookRight))
+            {
+                _LookRight = !_LookRight;
+                obj.transform.Rotate(0f, 180f, 0f);
+            }
+            else
+            {
+                obj.transform.Rotate(0f, 0f, 0f);
+            }
         }
     }
 
     IEnumerator Shoot()
     {
-        animator.SetBool("Attack", true);
-        yield return new WaitForSeconds(0.8f);
-        GameObject Bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
-        Bullet.GetComponent<Rigidbody2D>().AddForce(firePoint.up * fireForce, ForceMode2D.Force);
-        animator.SetBool("Attack",false);
+        if (!gameObject.GetComponent<EnemyHealth>().isDead)
+        {
+            animator.SetBool("Attack", true);
+            yield return new WaitForSeconds(0.8f);
+            GameObject Bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+            Bullet.GetComponent<Rigidbody2D>().AddForce(firePoint.up * fireForce, ForceMode2D.Force);
+            animator.SetBool("Attack", false);
+        }
     }
     bool isInCollider(Collider2D[] collider, GameObject gameObject)
     {

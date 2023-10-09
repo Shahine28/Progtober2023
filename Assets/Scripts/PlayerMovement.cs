@@ -15,7 +15,10 @@ public class PlayerMovement : MonoBehaviour
     private Vector2 _smoothedMovementInput;
     private Vector2 _movementInputSmoothVelocity;
     [SerializeField] PlayerInput _playerInput;
-    Vector2 moveDirection;
+    private Vector2 moveDirection;
+
+    public float HorizontalIdle;
+    public float VerticalIdle;
   
 
     [Header("Dash")]
@@ -28,6 +31,8 @@ public class PlayerMovement : MonoBehaviour
     [Header("Animation")]
     [SerializeField] Animator _animator;
     private bool _LookRight;
+
+    [HideInInspector] public bool usedTP;
     
 
     private void Awake()
@@ -44,6 +49,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (isDashing) return;
         Tourner();
+        TournerIdle();
         moveDirection = new Vector2(_movementInput.x, _movementInput.y).normalized;
         
     }
@@ -95,6 +101,33 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    void TournerIdle()
+    {
+        if (moveDirection.x < 0f)
+        {
+            HorizontalIdle = -1f;
+            VerticalIdle = 0;
+        }
+        else if (moveDirection.x > 0f)
+        {
+            HorizontalIdle = 1f;
+            VerticalIdle = 0;
+        }
+
+        if (moveDirection.y < 0f)
+        {
+            HorizontalIdle = 0f;
+            VerticalIdle = -1;
+        }
+        else if (moveDirection.y > 0f)
+        {
+            HorizontalIdle = 0f;
+            VerticalIdle = 1;
+        }
+
+        _animator.SetFloat("HorizontalIdle", HorizontalIdle);
+        _animator.SetFloat("VerticalIdle", VerticalIdle);
+    }
     IEnumerator Dash()
     {
         canDash = false;

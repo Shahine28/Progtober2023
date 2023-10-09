@@ -18,7 +18,7 @@ public class PlayerAttack : MonoBehaviour
     }
     void Update()
     {
-  
+        TournerY();
     }
     void Attack() 
     {
@@ -27,6 +27,10 @@ public class PlayerAttack : MonoBehaviour
         foreach(Collider2D enemy in hitEnemies)
         {
             Debug.Log("We hit "+ enemy.gameObject.name);
+            if (enemy.gameObject.layer == 9 )
+            {
+                StartCoroutine(enemy.gameObject.GetComponent<EnemyHealth>().TakeDamage(1));
+            }
         }
     }
 
@@ -55,6 +59,26 @@ public class PlayerAttack : MonoBehaviour
         
     }
 
+    void TournerY()
+    {
+        if (GetComponent<PlayerMovement>().HorizontalIdle > 0) //Vers la droite
+        {
+            _attackPoint.position = new Vector2(transform.position.x + 0.95f, transform.position.y + 0.25f);
+        }
+        else if (GetComponent<PlayerMovement>().HorizontalIdle < 0) // Vers la gauche
+        {
+            _attackPoint.position = new Vector2(transform.position.x - 0.95f, transform.position.y + 0.25f);
+        }
+
+        if (GetComponent<PlayerMovement>().VerticalIdle > 0) // Vers le haut
+        {
+            _attackPoint.position = new Vector2(transform.position.x, transform.position.y+0.9f);
+        }
+        else if (GetComponent<PlayerMovement>().VerticalIdle < 0) // Vers le bas
+        {
+            _attackPoint.position = new Vector2(transform.position.x, transform.position.y+  - 0.15f);
+        }
+    }
     private void OnDrawGizmosSelected()
     {
         if (_attackPoint == null) return;

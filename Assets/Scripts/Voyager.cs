@@ -7,8 +7,17 @@ public class Voyager : MonoBehaviour
 {
     public string destination;
 
+    public void Start()
+    {
+        if (GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerMovement>().usedTP)
+        {
+            GameObject.FindGameObjectWithTag("Player").transform.position = new Vector2(transform.position.x,transform.position.y - 1.5f);
+        }
+        
+    }
     public void voyager()
     {
+        GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerMovement>().usedTP = true;
         if (destination != null && destination == "SpiderJour2")
         {
             Debug.Log("Réveillez-vous !");
@@ -31,6 +40,7 @@ public class Voyager : MonoBehaviour
     {
         yield return new WaitForSeconds(secondes);
         SceneManager.LoadScene(destination);
+        
     }
 }
     
