@@ -12,9 +12,13 @@ public class EnemyHealth : MonoBehaviour
     [SerializeField] Animator animator;
     [SerializeField] Color damageColor;
     [SerializeField] SpriteRenderer spriteRenderer;
+    [SerializeField] int coinValue;
+    [SerializeField] GameObject Coin1;
+    [SerializeField] GameObject Coin5;
     void Start()
     {
-        
+/*        Debug.Log(coinValue / 5);
+        Debug.Log(coinValue % 5);*/
     }
 
     // Update is called once per frame
@@ -37,9 +41,29 @@ public class EnemyHealth : MonoBehaviour
         {
             isDead = true;
             animator.SetTrigger("Dead");
-            Destroy(gameObject, 10f);
+            if (coinValue > 5)
+            {
+                for (int i = 0; i < coinValue / 5; i++)
+                {
+                    Instantiate(Coin5, gameObject.transform.position, Quaternion.identity);
+                }
+                for (int i = 0; i < coinValue % 5; i++)
+                {
+                    Instantiate(Coin1, gameObject.transform.position, Quaternion.identity);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < coinValue; i++)
+                {
+                    Instantiate(Coin1, gameObject.transform.position, Quaternion.identity);
+                }
+            }
+
+            Destroy(gameObject, 15f);
         }
     }
+
     private void OnValidate()
     {
         if (health > maxHealth)
@@ -55,6 +79,11 @@ public class EnemyHealth : MonoBehaviour
         if(maxHealth < 0)
         {
             maxHealth = Mathf.Abs(maxHealth); 
+        }
+
+        if(coinValue < 0)
+        {
+            coinValue = 0;
         }
     }
 }

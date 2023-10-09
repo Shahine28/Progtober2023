@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TreeEditor;
+using Unity.VisualScripting;
 using UnityEngine;
 
 
@@ -21,25 +23,26 @@ public class Loot : MonoBehaviour
 	private Transform t_body; // Body
 	private Transform t_shadow; // Shadow
 
-	#region OPTIONAL PICK UP
-	bool canCollect;
-
-	BoxCollider2D pickUpCollision;
+    #region OPTIONAL PICK UP
+    [HideInInspector] public bool canCollect;
+	[SerializeField] public float magnetRange = 1;
+    [SerializeField] public float Speed = 1;
+    BoxCollider2D pickUpCollision;
 	// Detect if hits the wall / even it looks like its never used, it is.
 	BoxCollider2D triggerCollision;
 
 	// Dont forget to add rigidbody to the player and right Tag
-	private void PickUp(Collider2D collision)
+/*	private void PickUp(Collider2D collision)
 	{
 		// Here write your logic like ... collision.GetComponent<PlayerInvetory>();
 		print($"{this.gameObject.name} has been picked up");
 		Destroy(this.gameObject);
-	}
+	}*/
 
    	private void OnTriggerEnter2D(Collider2D collision)
 	{
-		if (collision.CompareTag(settings.collectorTag) && canCollect)
-			PickUp(collision);
+/*		if (collision.CompareTag(settings.collectorTag) && canCollect)
+			PickUp(collision);*/
 
 		if (CompareCollisionTags(collision))
 			collide = true;
@@ -78,8 +81,12 @@ public class Loot : MonoBehaviour
 
 	void Update()
 	{
-        UpdatePosition();
-	}
+        pickUpCollision.enabled=false;
+		CreateShadowBis();
+		UpdatePosition();
+		Mangneztize();
+
+    }
 
 	void Initialize(Vector2 groundvelocity)
 	{
@@ -101,7 +108,7 @@ public class Loot : MonoBehaviour
 
 	private IEnumerator Simulate()
 	{
-	    yield return new WaitForSeconds(1f);
+	    yield return new WaitForSeconds(0.1f);
 		groundVelocity = new Vector2(Random.Range(-settings.horizontalForce, settings.horizontalForce), Random.Range(-settings.horizontalForce, settings.horizontalForce));
 		verticalVelocity = Random.Range(settings.velocity - 1, settings.velocity);
 		afterVelocity = verticalVelocity;
@@ -155,10 +162,12 @@ public class Loot : MonoBehaviour
 				// Item can be collected
 				if (settings.pickUpType == PickUpType.AFTER)
 				{
-                    ChangeItemToBeCollectable(); 
+                    ChangeItemToBeCollectable();
+					pickUpCollision.enabled = false;
                     sprRndShadow.enabled = false;
                     sprRndBody.enabled = false;
                     sprRndCaster.enabled = true;
+
                     
                 }
 					
@@ -176,8 +185,9 @@ public class Loot : MonoBehaviour
 
 	private void ChangeItemToBeCollectable()
 	{
-		pickUpCollision.enabled = true;
-		canCollect = true;
+        canCollect = true;
+        pickUpCollision.enabled = true;
+
 	}
 
 	private bool CompareCollisionTags(Collider2D collider)
@@ -214,7 +224,9 @@ public class Loot : MonoBehaviour
 		sprRndBody.sortingLayerName = sprRndCaster.sortingLayerName;
 		sprRndBody.sortingOrder = sprRndCaster.sortingOrder;
 		sprRndBody.sprite = sprRndCaster.sprite;
-	}
+        sprRndBody.transform.localScale = new Vector3(1, 1, 1);
+
+    }
 
 	/// <summary>
 	/// Will create a shadow Sprite Renderer to a Parent
@@ -233,9 +245,35 @@ public class Loot : MonoBehaviour
 		sprRndShadow.sortingOrder = sprRndCaster.sortingOrder - 1;
 		sprRndShadow.color = Color.black;
 		sprRndShadow.sprite = sprRndCaster.sprite;
+        sprRndShadow.transform.localScale = new Vector3(1, 1, 1);
+    }
+
+	void CreateShadowBis()
+	{
+        sprRndBody.sprite = sprRndCaster.sprite;
+        sprRndShadow.transform.localScale = new Vector3(1,1,1);
+        sprRndShadow.sprite = sprRndCaster.sprite;	
 	}
 
-	#endregion
+	void Mangneztize()
+	{
+		Collider2D[] zoneMagnetique = Physics2D.OverlapCircleAll(transform.position, magnetRange);
+		foreach(Collider2D col in zoneMagnetique)
+		{
+			if(col.gameObject.tag == "Player" && canCollect)
+			{
+				transform.position = Vector2.MoveTowards(transform.position, col.gameObject.transform.position, Speed * Time.deltaTime);
+				Speed += 0.05f; // Je veux donner une impression d'accélération.
+			}
+		}
+	}
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.green;
+		Gizmos.DrawWireSphere(transform.position, magnetRange);
+    }
+    #endregion
 }
 
 // You can also make it as Scriptable Object.
@@ -271,9 +309,9 @@ public class LootSettings
 
 	public float destroyTime = 0f;
 
-    	[Tooltip("When Item hits the wall with that tag")]
-    	public string[] colliderTags;
-	
+    [Tooltip("When Item hits the wall with that tag")]
+    public string[] colliderTags;
+
 }
 
 public enum PickUpType
