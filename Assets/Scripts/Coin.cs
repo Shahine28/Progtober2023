@@ -8,10 +8,6 @@ public class Coin : MonoBehaviour
     public float Gold = 0;
     [SerializeField] TextMeshProUGUI coinSTR;
     // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
 
     // Update is called once per frame
     void Update()

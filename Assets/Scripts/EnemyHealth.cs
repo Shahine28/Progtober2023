@@ -37,22 +37,22 @@ public class EnemyHealth : MonoBehaviour
             spriteRenderer.color = new Color(255, 255, 255);
         }
 
-        if (health <= 0)
+        if (health <= 0 && !isDead)
         {
             isDead = true;
             animator.SetTrigger("Dead");
             if (coinValue > 5)
             {
-                for (int i = 0; i < coinValue / 5; i++)
+                for (int i = 0; i < coinValue/5; i++)
                 {
                     Instantiate(Coin5, gameObject.transform.position, Quaternion.identity);
                 }
-                for (int i = 0; i < coinValue % 5; i++)
+                for (int i = 0; i < coinValue%5; i++)
                 {
                     Instantiate(Coin1, gameObject.transform.position, Quaternion.identity);
                 }
             }
-            else
+            else if (coinValue < 5)
             {
                 for (int i = 0; i < coinValue; i++)
                 {

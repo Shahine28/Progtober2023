@@ -423,7 +423,7 @@ MonoBehaviour:
   animator: {fileID: 102464508}
   damageColor: {r: 1, g: 0, b: 0, a: 1}
   spriteRenderer: {fileID: 102464503}
-  coinValue: 142
+  coinValue: 100
   Coin1: {fileID: 1183618049053002557, guid: 59905e03c094a7840be195e380974732, type: 3}
   Coin5: {fileID: 7613290562872028418, guid: 758553792ced5924982d18679c6dbedc, type: 3}
 --- !u!1 &294478974
