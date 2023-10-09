@@ -27,12 +27,12 @@ public class Coin : MonoBehaviour
     {
         if (collision.GetType().ToString() == "UnityEngine.CircleCollider2D")
         {
-            if (collision.gameObject.CompareTag("Coin1"))
+            if (collision.CompareTag("Coin1"))
             {
                 Destroy(collision.gameObject);
                 Gold += 1f;
             }
-            if (collision.gameObject.CompareTag("Coin5"))
+            if (collision.CompareTag("Coin5"))
             {
                 Destroy(collision.gameObject);
                 Gold += 5f;
