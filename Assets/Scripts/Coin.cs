@@ -21,7 +21,7 @@ public class Coin : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.GetType().ToString() == "UnityEngine.CircleCollider2D")
+        if (collision.GetType().ToString() == "UnityEngine.CircleCollider2D") // car les pièces ont plusieurs colliders.
         {
             if (collision.CompareTag("Coin1"))
             {
