@@ -4,10 +4,11 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
-    [SerializeField] float Damage;
+    public float _damage;
     [SerializeField] float Speed;
     [SerializeField] Animator animator;
     [SerializeField] GameObject DestroyPrefab;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -28,9 +29,10 @@ public class Bullet : MonoBehaviour
     {
         if (collision.gameObject.tag == "Player")
         {
-            
-            /*collision.gameObject.GetComponent<Health>().takeDamage(Damage);*/
-            
+
+            collision.gameObject.GetComponent<PlayerHealth>().TakeDamage(_damage);
+
+
         }
         animator.SetBool("Touch", true);
         Instantiate(DestroyPrefab, gameObject.transform.position, gameObject.transform.rotation);

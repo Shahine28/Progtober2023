@@ -31,7 +31,7 @@ public class Voyager : MonoBehaviour
         else if(destination != null)
         {
             Debug.Log("Bon Voyage !");
-            StartCoroutine(voyageDans(3f));
+            StartCoroutine(voyageDans(1f));
         }
 
     }

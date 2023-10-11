@@ -9,6 +9,8 @@ using UnityEngine.InputSystem;
 public class InteractableObject : MonoBehaviour
 {
     [SerializeField] float ZoneInterraction;
+    public float zoneInterraction=>ZoneInterraction;
+
     [SerializeField] GameObject toucheE;
     [SerializeField] Vector2 positionToucheE;
     bool toucheEIsPressed;

@@ -24,6 +24,7 @@ public class SpiderBehavior : MonoBehaviour
     [SerializeField] float fireForce;
     [SerializeField] float cadence;
     float cadenceTmp;
+    [SerializeField] float Damage;
     // Start is called before the first frame update
     void Start()
     {
@@ -60,15 +61,19 @@ public class SpiderBehavior : MonoBehaviour
         {
             seePlayer = false;
         }
-        if (isInCollider(zoneDegat, GameObject.FindGameObjectWithTag("Player")))
+        if (isInCollider(zoneDegat, GameObject.FindGameObjectWithTag("Player")) && GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerHealth>().CanBeAttacked)
         {
             isSetUp = true;
             seePlayer = true;
             cadence -= Time.deltaTime;
 
-            if (cadence <= 0)
+            if (cadence <= 0 && GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerHealth>().CanBeAttacked)
             {
                 StartCoroutine(Shoot());
+                cadence = cadenceTmp;
+            }
+            else if (cadence <= 0 && !GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerHealth>().CanBeAttacked)
+            {
                 cadence = cadenceTmp;
             }
         }
@@ -125,6 +130,7 @@ public class SpiderBehavior : MonoBehaviour
             animator.SetBool("Attack", true);
             yield return new WaitForSeconds(0.8f);
             GameObject Bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+            Bullet.GetComponent<Bullet>()._damage = Damage;
             Bullet.GetComponent<Rigidbody2D>().AddForce(firePoint.up * fireForce, ForceMode2D.Force);
             animator.SetBool("Attack", false);
         }

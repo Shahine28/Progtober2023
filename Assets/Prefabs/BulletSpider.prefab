@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 3933395965675086114}
   - component: {fileID: 5082006876090469778}
   - component: {fileID: 4927958362843746466}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: BulletSpider
   m_TagString: Bullet
   m_Icon: {fileID: 0}
@@ -162,7 +162,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc9ea460ccff60c4ca233e0aa72fbc97, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Damage: 0
+  _damage: 0
   Speed: 0
   animator: {fileID: 4927958362843746466}
   DestroyPrefab: {fileID: 1359455357925146226, guid: 6dcd4421dfc662f47bfc0c1ae7b1eaca, type: 3}
