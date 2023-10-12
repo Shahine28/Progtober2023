@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d0df50695e602c648a0f39528bf7885a, type: 3}
-  m_Name: New Loot Fortune 1
+  m_Name: Poisson
   m_EditorClassIdentifier: 
-  lootSprite: {fileID: 21300000, guid: 8f952403ad5328042a7070c21220cafb, type: 3}
-  lootName: Potion Vie
-  dropChance: 50
+  lootSprite: {fileID: 21300000, guid: def1667920927274bbf23574e429aae7, type: 3}
+  lootName: Poisson
+  dropChance: 10

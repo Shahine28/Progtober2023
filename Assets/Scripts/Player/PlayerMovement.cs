@@ -14,7 +14,7 @@ public class PlayerMovement : MonoBehaviour
     private Vector2 _movementInput;
     private Vector2 _smoothedMovementInput;
     private Vector2 _movementInputSmoothVelocity;
-    [SerializeField] PlayerInput _playerInput;
+    [SerializeField] InputGame _playerInput;
     private Vector2 moveDirection;
 
     public float HorizontalIdle;
@@ -38,7 +38,7 @@ public class PlayerMovement : MonoBehaviour
     private void Awake()
     {
         _rigidbody = GetComponent<Rigidbody2D>();
-        _playerInput = new PlayerInput();
+        _playerInput = new InputGame();
     }
 
     private void Start()

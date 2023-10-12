@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 
 public class PlayerAttack : MonoBehaviour
 {
-    [SerializeField] PlayerInput _playerInput;
+    [SerializeField] InputGame _playerInput;
     [SerializeField] Animator _animator;
     [SerializeField] Transform _attackPoint;
     [SerializeField] float _attackRange;
@@ -14,7 +14,7 @@ public class PlayerAttack : MonoBehaviour
     // Update is called once per frame
     void Awake()
     {
-        _playerInput = new PlayerInput();
+        _playerInput = new InputGame();
     }
     void Update()
     {
@@ -50,7 +50,7 @@ public class PlayerAttack : MonoBehaviour
 
     private void OnEnable()
     {
-        _playerInput.Player.Fire.Disable();
+        _playerInput.Player.Fire.Enable();
     }
 
     private void OnDisable()
