@@ -13,6 +13,16 @@ public class UIInventoryPage : MonoBehaviour
 
     [SerializeField] List<LootFortune> listOfObjects  = new List<LootFortune>();
 
+    [SerializeField] private MouseFollower mouseFolower;
+
+    private void Awake()
+    {
+        Hide();
+        mouseFolower.Toggle(false);
+        
+    }
+
+
     public void InitializeInventoryUI(int inventorySize)
     {
         for(int i = 0; i < inventorySize; i++)
@@ -40,12 +50,13 @@ public class UIInventoryPage : MonoBehaviour
 
     private void HandleEndDrag(UIInventoryItem item)
     {
-        
+        mouseFolower.Toggle(false);
     }
 
     private void HandleBeginDrag(UIInventoryItem item)
     {
-        
+        mouseFolower.Toggle(true);
+        mouseFolower.SetData(listOfObjects[0].lootSprite, 1);
     }
 
     private void HandleItemSelection(UIInventoryItem item)

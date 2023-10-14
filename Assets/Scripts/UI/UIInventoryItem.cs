@@ -13,6 +13,7 @@ public class UIInventoryItem : MonoBehaviour
     private Image itemImage;
     [SerializeField] private TextMeshProUGUI quantityTxt;
     [SerializeField] private Image borderImage;
+    [SerializeField] private GameObject CoutIcon;
 
     public event Action<UIInventoryItem> OnItemClicked, OnItemDropped, OnItemBeginDrag, OnItemEndDrag, OnRightMouseBtnClick;
     private bool empty = true;
@@ -27,6 +28,7 @@ public class UIInventoryItem : MonoBehaviour
     {
         this.itemImage.gameObject.SetActive(false);
         this.empty = true;
+        CoutIcon.SetActive(false);
     }
     public void Deselect()
     {
@@ -45,6 +47,7 @@ public class UIInventoryItem : MonoBehaviour
         this.itemImage.sprite = sprite;
         this.quantityTxt.text = quantity + "";
         this.empty = false;
+        CoutIcon.SetActive(true) ;
     }
 
     public void OnBeginDrag()
