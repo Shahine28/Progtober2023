@@ -208,10 +208,12 @@ public class Loot : MonoBehaviour
 	private SpriteRenderer sprRndBody;
 	private SpriteRenderer sprRndShadow;
 
-	/// <summary>
-	/// Will create a icon Sprite Renderer to a Parent
-	/// </summary>
-	void CreateBody()
+	public bool FollowPlayer;
+
+    /// <summary>
+    /// Will create a icon Sprite Renderer to a Parent
+    /// </summary>
+    void CreateBody()
 	{
 		t_parent = transform;
 		t_body = new GameObject().transform;
@@ -255,18 +257,25 @@ public class Loot : MonoBehaviour
         sprRndShadow.sprite = sprRndCaster.sprite;	
 	}
 
-	void Mangneztize()
+    void Mangneztize()
 	{
 		Collider2D[] zoneMagnetique = Physics2D.OverlapCircleAll(transform.position, magnetRange);
 		foreach(Collider2D col in zoneMagnetique)
 		{
 			if(col.gameObject.tag == "Player" && canCollect)
 			{
-				transform.position = Vector2.MoveTowards(transform.position, col.gameObject.transform.position, Speed * Time.deltaTime);
-				Speed += 0.05f; // Je veux donner une impression d'accélération.
+				FollowPlayer = true;
 			}
 		}
+
+		if (FollowPlayer && GetComponent<Item>().hasSpaceToBePickUp)
+		{
+            this.transform.position = Vector2.MoveTowards(transform.position, GameObject.FindGameObjectWithTag("Player").gameObject.transform.position, Speed * Time.deltaTime);
+            this.Speed += 0.05f; // Je veux donner une impression d'accélération.
+        }
 	}
+
+	
 
     private void OnDrawGizmosSelected()
     {
