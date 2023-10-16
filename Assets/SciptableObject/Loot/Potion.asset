@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0df50695e602c648a0f39528bf7885a, type: 3}
   m_Name: Potion
   m_EditorClassIdentifier: 
-  lootSprite: {fileID: 21300000, guid: 8f952403ad5328042a7070c21220cafb, type: 3}
-  lootName: Potion Vie
+  <lootSprite>k__BackingField: {fileID: 21300000, guid: 7c731a03b7ff61f45ab7490f172dfdae, type: 3}
+  <lootName>k__BackingField: Potion
   dropChance: 50
+  <IsStackable>k__BackingField: 1
+  <MaxStackSize>k__BackingField: 64
