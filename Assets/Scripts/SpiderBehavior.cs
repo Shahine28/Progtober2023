@@ -24,7 +24,7 @@ public class SpiderBehavior : MonoBehaviour
     [SerializeField] float fireForce;
     [SerializeField] float cadence;
     float cadenceTmp;
-    [SerializeField] float Damage;
+    [SerializeField] int Damage;
     // Start is called before the first frame update
     void Start()
     {

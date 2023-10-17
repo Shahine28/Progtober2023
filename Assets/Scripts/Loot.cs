@@ -265,12 +265,19 @@ public class Loot : MonoBehaviour
 			if(col.gameObject.tag == "Player" && canCollect)
 			{
 				FollowPlayer = true;
-			}
+/*                this.transform.position = Vector2.MoveTowards(transform.position, GameObject.FindGameObjectWithTag("Player").transform.position, Speed * Time.deltaTime);
+                this.Speed += 0.05f; // Je veux donner une impression d'accélération.*/
+            }
 		}
 
-		if (FollowPlayer && GetComponent<Item>().hasSpaceToBePickUp)
+		if (FollowPlayer && (gameObject.tag != "Coin1" || gameObject.tag != "Coin5") && GetComponent<Item>().hasSpaceToBePickUp)
 		{
-            this.transform.position = Vector2.MoveTowards(transform.position, GameObject.FindGameObjectWithTag("Player").gameObject.transform.position, Speed * Time.deltaTime);
+            this.transform.position = Vector2.MoveTowards(transform.position, GameObject.FindGameObjectWithTag("Player").transform.position, Speed * Time.deltaTime);
+            this.Speed += 0.05f; // Je veux donner une impression d'accélération.
+        }
+		else if (FollowPlayer && (gameObject.tag == "Coin1" || gameObject.tag == "Coin5"))
+		{
+            this.transform.position = Vector2.MoveTowards(transform.position, GameObject.FindGameObjectWithTag("Player").transform.position, Speed * Time.deltaTime);
             this.Speed += 0.05f; // Je veux donner une impression d'accélération.
         }
 	}

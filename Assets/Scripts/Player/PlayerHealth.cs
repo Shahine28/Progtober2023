@@ -32,7 +32,25 @@ public class PlayerHealth : MonoBehaviour
         }
     }
 
-    public void TakeDamage(float damage)
+    public void TakeHeal(int heal)
+    {
+        if (health < maxHealth && !isDead)
+        {
+            if (health + heal > maxHealth)
+            {
+                health = maxHealth;
+                OnPlayerDamage?.Invoke();
+            }
+            else
+            {
+                health += heal;
+                OnPlayerDamage?.Invoke();
+            }
+        
+        }
+    }
+
+    public void TakeDamage(int damage)
     {
         health -= damage;
         OnPlayerDamage?.Invoke();

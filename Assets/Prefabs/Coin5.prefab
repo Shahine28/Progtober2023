@@ -172,6 +172,7 @@ MonoBehaviour:
   canCollect: 0
   magnetRange: 1.25
   Speed: 1.5
+  FollowPlayer: 0
 --- !u!61 &6568800753331408930
 BoxCollider2D:
   m_ObjectHideFlags: 0
