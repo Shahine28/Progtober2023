@@ -24,7 +24,8 @@ namespace Inventory.UI
         public event Action<int> OnItemActionRequested, OnStartDragging, OnItemClicked;
         public event Action<int, int> OnSwapItems;
 
-
+        [SerializeField]
+        private ItemActionPanel actionPanel;
         private void Awake()
         {
             Hide();
@@ -58,12 +59,17 @@ namespace Inventory.UI
 
         private void HandleShowItemActions(UIInventoryItem inventoryItemUI)
         {
-
+            
+            int index = listOfUIItems.IndexOf(inventoryItemUI);
+            if (index == -1)
+            {
+                return;
+            }
+            OnItemActionRequested?.Invoke(index);
         }
 
         private void HandleSwap(UIInventoryItem inventoryItemUI)
         {
-            Debug.Log("Swap");
             int index = listOfUIItems.IndexOf(inventoryItemUI);
             if (index == -1)
             {
@@ -84,6 +90,16 @@ namespace Inventory.UI
         {
             DeselectAllItems();
         }
+        public void AddAction(string actionName, Action performAction)
+        {
+            actionPanel.AddButon(actionName, performAction);
+        }
+
+        public void ShowItemActions(int itemIndex)
+        {
+            actionPanel.Toggle(true);
+            actionPanel.transform.position = listOfUIItems[itemIndex].transform.position;
+        }
 
         private void DeselectAllItems()
         {
@@ -91,6 +107,7 @@ namespace Inventory.UI
             {
                 item.Deselect();
             }
+            actionPanel.Toggle(false);
         }
 
         private void HandleEndDrag(UIInventoryItem inventoryItemUI)
@@ -133,14 +150,16 @@ namespace Inventory.UI
 
         public void Hide()
         {
+            actionPanel.Toggle(false);
             gameObject.SetActive(false);
             ResetDraggedItem();
         }
 
-        internal void UdpateClick(int itemIndex)
+        internal void UdpateClick(int itemIndex, string description)
         {
             DeselectAllItems();
             listOfUIItems[itemIndex].Select();
+            Debug.Log(description);
         }
 
         internal void ResetAllItems()

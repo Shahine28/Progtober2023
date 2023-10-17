@@ -88,7 +88,7 @@ namespace Inventory.UI
 
         public void OnEndDrag(PointerEventData eventData)
         {
-            Debug.Log(OnItemEndDrag);
+            
             OnItemEndDrag?.Invoke(this);
         }
 

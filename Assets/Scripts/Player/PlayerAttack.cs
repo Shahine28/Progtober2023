@@ -1,3 +1,4 @@
+using Inventory;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -39,7 +40,10 @@ public class PlayerAttack : MonoBehaviour
         if (context.performed)
         {
             /*Debug.Log("J'appuie");*/
-            Attack();
+            if (!GetComponent<InventoryController>().inventoryUIIsOpen)
+            {
+                Attack();
+            }
             
         }
         else if (context.canceled)
