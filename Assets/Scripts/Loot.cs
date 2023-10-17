@@ -264,18 +264,18 @@ public class Loot : MonoBehaviour
 		{
 			if(col.gameObject.tag == "Player" && canCollect)
 			{
+				if (gameObject.tag == "Item") col.gameObject.GetComponent<InventoryPickUpSystem>().HasSpaceToStoreItem(gameObject);
 				FollowPlayer = true;
-/*                this.transform.position = Vector2.MoveTowards(transform.position, GameObject.FindGameObjectWithTag("Player").transform.position, Speed * Time.deltaTime);
-                this.Speed += 0.05f; // Je veux donner une impression d'accélération.*/
-            }
+				if (gameObject.tag == "Coin1" || gameObject.tag == "Coin5")
+				{
+                    this.transform.position = Vector2.MoveTowards(transform.position, GameObject.FindGameObjectWithTag("Player").transform.position, Speed * Time.deltaTime);
+                    this.Speed += 0.05f; // Je veux donner une impression d'accélération.
+                }
+
+			}
 		}
 
-		if (FollowPlayer && (gameObject.tag != "Coin1" || gameObject.tag != "Coin5") && GetComponent<Item>().hasSpaceToBePickUp)
-		{
-            this.transform.position = Vector2.MoveTowards(transform.position, GameObject.FindGameObjectWithTag("Player").transform.position, Speed * Time.deltaTime);
-            this.Speed += 0.05f; // Je veux donner une impression d'accélération.
-        }
-		else if (FollowPlayer && (gameObject.tag == "Coin1" || gameObject.tag == "Coin5"))
+		if (gameObject.tag == "Item" && FollowPlayer && GetComponent<Item>().hasSpaceToBePickUp)
 		{
             this.transform.position = Vector2.MoveTowards(transform.position, GameObject.FindGameObjectWithTag("Player").transform.position, Speed * Time.deltaTime);
             this.Speed += 0.05f; // Je veux donner une impression d'accélération.

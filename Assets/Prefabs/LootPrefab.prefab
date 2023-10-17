@@ -18,7 +18,7 @@ GameObject:
   - component: {fileID: 8057158982975112204}
   m_Layer: 12
   m_Name: LootPrefab
-  m_TagString: Untagged
+  m_TagString: Item
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -133,7 +133,7 @@ MonoBehaviour:
   <InventoryItem>k__BackingField: {fileID: 0}
   <Quantity>k__BackingField: 32
   duration: 0.3
-  hasSpaceToBePickUp: 1
+  hasSpaceToBePickUp: 0
 --- !u!58 &1054005708507202236
 CircleCollider2D:
   m_ObjectHideFlags: 0

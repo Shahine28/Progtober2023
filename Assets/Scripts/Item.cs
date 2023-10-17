@@ -10,8 +10,9 @@ public class Item : MonoBehaviour
     /*    [SerializeField] AudioSource audioSource;*/
     [SerializeField] private float duration = 0.15f;
 
-    public bool hasSpaceToBePickUp = true;
+    public bool hasSpaceToBePickUp;
 
+    
 
 
     public IEnumerator AnimateItemPickup()
@@ -27,7 +28,8 @@ public class Item : MonoBehaviour
             yield return null;
         }
         Destroy(gameObject);
-        
-    }    
-    
+    }
+
+   
+
 }
