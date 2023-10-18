@@ -131,7 +131,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <InventoryItem>k__BackingField: {fileID: 0}
-  <Quantity>k__BackingField: 32
+  <Quantity>k__BackingField: 31
   duration: 0.3
   hasSpaceToBePickUp: 0
 --- !u!58 &1054005708507202236

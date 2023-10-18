@@ -13,7 +13,7 @@ namespace Inventory.UI
     {
         [SerializeField] private UIInventoryItem itemPrefab;
         [SerializeField] private RectTransform contentPanel;
-        private List<UIInventoryItem> listOfUIItems = new List<UIInventoryItem>();
+        public List<UIInventoryItem> listOfUIItems = new List<UIInventoryItem>();
 
         [SerializeField] List<LootFortune> listOfObjects = new List<LootFortune>();
 

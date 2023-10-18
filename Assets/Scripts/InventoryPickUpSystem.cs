@@ -6,12 +6,13 @@ using UnityEngine;
 
 public class InventoryPickUpSystem : MonoBehaviour
 {
-    [SerializeField] public InventorySO inventoryData;
+    [SerializeField] public InventorySO mainInventoryData;
+    [SerializeField] public InventorySO toolbarInventoryData;
 
     public void HasSpaceToStoreItem(GameObject obj)
     {
         Item item = obj.GetComponent<Item>();
-        if (inventoryData.IsInventoryFull())
+        if (mainInventoryData.IsInventoryFull())
         {
             item.hasSpaceToBePickUp = false;
         }
@@ -28,16 +29,32 @@ public class InventoryPickUpSystem : MonoBehaviour
             Item item = collision.GetComponent<Item>();
             if (item != null)
             {
-                int reminder = inventoryData.AddItem(item.InventoryItem, item.Quantity);
-                if (reminder == 0)
+                int reminder;
+                if (!toolbarInventoryData.IsInventoryFull())
                 {
-                    Debug.Log("Truman Show");
-                    StartCoroutine(item.AnimateItemPickup());
+                    reminder = toolbarInventoryData.AddItem(item.InventoryItem, item.Quantity);
+                    if (reminder == 0)
+                    {
+                        StartCoroutine(item.AnimateItemPickup());
+                    }
+                    else
+                    {
+                        item.Quantity = reminder;
+                    }
                 }
-                else 
+                else
                 {
-                    item.Quantity = reminder;
+                    reminder = mainInventoryData.AddItem(item.InventoryItem, item.Quantity);
+                    if (reminder == 0)
+                    {
+                        StartCoroutine(item.AnimateItemPickup());
+                    }
+                    else
+                    {
+                        item.Quantity = reminder;
+                    }
                 }
+
             }
         }
     }
