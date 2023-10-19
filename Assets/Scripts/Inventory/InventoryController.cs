@@ -2,6 +2,7 @@ using Inventory.Model;
 using Inventory.UI;
 using System.Collections.Generic;
 using System.Text;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -40,7 +41,7 @@ namespace Inventory
         private Dictionary<InventorySO, List<InventoryItem>> _initialItems = new Dictionary<InventorySO, List<InventoryItem>>();
 
         private string lastInventoryRecorded; // A utiliser uniquement lorsque je ne peux pas accéder à l'inventaire survolé par ma souris.
-        
+        private int lastItemSelected;
 
         private void Awake()
         {
@@ -50,6 +51,7 @@ namespace Inventory
 
         private void Start()
         {
+           
             // Ajoutez les inventaires existants
             Inventories.Add("MainInventory", mainInventoryData);
             Inventories.Add("ToolbarInventory", toolbarInventoryData);
@@ -65,9 +67,14 @@ namespace Inventory
             _inventoryUI.Add(toolbarInventoryData, inventoryUIBar);
             _initialItems.Add(toolbarInventoryData, initialBarItems);
 
+/*            Debug.Log(GetItemsNumber("ToolbarInventory"));*/
+
+
             PrepareUI();
             PrepareInventoryData();
 
+            string description = PrepareDescription(Inventories["ToolbarInventory"].GetItemAt(0));
+            inventoryUIBar.UdpateClick(0, description);
             inventoryUIBar.Show();
 
             foreach (var inventoryEntry in Inventories)
@@ -164,25 +171,38 @@ namespace Inventory
 
         private void HandleItemClick(int itemIndex)
         {
-            string InventaireSouris = GetActiveInventoryUnderMouseTag();
-            InventoryItem inventoryItem = Inventories[InventaireSouris].GetItemAt(itemIndex);
-            UIInventoryPage UIinventory = _inventoryUI[Inventories[InventaireSouris]]; // j'obtiens l'UI relié à mon inventaire
-            if (inventoryItem.IsEmpty)
+           
+            if (inventoryUI.isActiveAndEnabled)
             {
-                UIinventory.ResetSelection();
-                return;
-            }
-            LootFortune item = inventoryItem.item;
-            string description = PrepareDescription(inventoryItem);
-            UIinventory.UdpateClick(itemIndex, description);
-            foreach(var UI in _inventoryUI)
-            {
-                if(UI.Value != UIinventory)
+                string InventaireSouris = GetActiveInventoryUnderMouseTag();
+                InventoryItem inventoryItem = Inventories[InventaireSouris].GetItemAt(itemIndex);
+                UIInventoryPage UIinventory = _inventoryUI[Inventories[InventaireSouris]]; // j'obtiens l'UI relié à mon inventaire
+                if (inventoryItem.IsEmpty)
                 {
-                    UI.Value.ResetSelection();
+                    foreach(var inventory in Inventories)
+                    {
+                        _inventoryUI[inventory.Value].ResetSelection();
+                    }
+                    return;
+                }
+                LootFortune item = inventoryItem.item;
+                string description = PrepareDescription(inventoryItem);
+                UIinventory.UdpateClick(itemIndex, description);
+                foreach (var UI in _inventoryUI)
+                {
+                    if (UI.Value != UIinventory)
+                    {
+                        UI.Value.ResetSelection();
+                    }
                 }
             }
+            else
+            {
+                
+                
+            }
         }
+
 
         private string PrepareDescription(InventoryItem inventoryItem)
         {
@@ -286,7 +306,11 @@ namespace Inventory
         public void inventory(InputAction.CallbackContext context)
         {
             if (context.performed)
-            {    
+            {
+                foreach (var inventory in Inventories)
+                {
+                    _inventoryUI[inventory.Value].ResetSelection();
+                }
                 /*Debug.Log("J'appuie");*/
                 if (!inventoryUI.isActiveAndEnabled)
                 {
@@ -302,7 +326,10 @@ namespace Inventory
                 {
 /*                    activeInventories.Remove("MainInventory");*/
                     inventoryUI.Hide();
+                    string description = PrepareDescription(Inventories["ToolbarInventory"].GetItemAt(0));
+                    inventoryUIBar.UdpateClick(0, description); // Lorsque que la
                     inventoryUIIsOpen = false;
+                    lastItemSelected = 0;
                 }
 
             }
@@ -312,6 +339,38 @@ namespace Inventory
             }
         }
 
+
+        public void OnScroll(InputAction.CallbackContext context)
+        {
+            if (context.performed)
+            {
+                if (!inventoryUI.isActiveAndEnabled)
+                {
+                    if (context.ReadValue<float>() > 0f)
+                    {
+                        Debug.Log("Scroll Up");
+                        lastItemSelected += 1;
+                    }
+                    if (context.ReadValue<float>() < 0f)
+                    {
+                        Debug.Log("Scroll Down");
+                        lastItemSelected -= 1;
+                    }
+                    if (lastItemSelected < 0)
+                    {
+                        lastItemSelected = GetItemsNumber("ToolbarInventory") - 1;
+                    }
+                    else if (lastItemSelected > GetItemsNumber("ToolbarInventory") - 1)
+                    {
+                        lastItemSelected = 0;
+                    }
+                    string description = PrepareDescription(Inventories["ToolbarInventory"].GetItemAt(lastItemSelected));
+                    inventoryUIBar.UdpateClick(lastItemSelected, description);
+
+                }
+
+            }
+        }
         private string GetActiveInventoryUnderMouseTag() // Renvoie le nom de l'inventaire au dessus duquel je passe ma souris
         {
             Vector2 mousePosition = Input.mousePosition;
@@ -338,7 +397,7 @@ namespace Inventory
                     {
                         parent = parent.transform.parent?.gameObject;
                     }
-                    lastInventoryRecorded = parent.tag;
+                    lastInventoryRecorded = parent?.tag;
                     return parent.tag; // La souris est au-dessus de cet inventaire
                 }
             }
@@ -346,14 +405,30 @@ namespace Inventory
             return null; // Aucun inventaire actif sous la souris
         }
 
+
+        private int GetItemsNumber(string nameInventory)
+        {
+            int numberItems = 0;
+            for (int i = 0; i < Inventories[nameInventory].inventoryItems.Count - 1; i++)
+            {
+                if (!Inventories[nameInventory].inventoryItems[i].IsEmpty)
+                {
+                    numberItems++;
+                }
+            }
+            return numberItems;
+
+        }
         private void OnEnable()
         {
             _playerInput.Player.Inventory.Enable();
+            _playerInput.Player.MouseScrollY.Enable();
         }
 
         private void OnDisable()
         {
             _playerInput.Player.Inventory.Disable();
+            _playerInput.Player.MouseScrollY.Disable();
 
         }
 
