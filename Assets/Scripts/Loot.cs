@@ -257,6 +257,7 @@ public class Loot : MonoBehaviour
         sprRndShadow.sprite = sprRndCaster.sprite;	
 	}
 
+	public bool hasNotBeDropped = true;
     void Mangneztize()
 	{
 		Collider2D[] zoneMagnetique = Physics2D.OverlapCircleAll(transform.position, magnetRange);
@@ -275,7 +276,7 @@ public class Loot : MonoBehaviour
 			}
 		}
 
-		if (gameObject.tag == "Item" && FollowPlayer && GetComponent<Item>().hasSpaceToBePickUp)
+		if (gameObject.tag == "Item" && FollowPlayer && GetComponent<Item>().hasSpaceToBePickUp && hasNotBeDropped)
 		{
             this.transform.position = Vector2.MoveTowards(transform.position, GameObject.FindGameObjectWithTag("Player").transform.position, Speed * Time.deltaTime);
             this.Speed += 0.05f; // Je veux donner une impression d'accélération.

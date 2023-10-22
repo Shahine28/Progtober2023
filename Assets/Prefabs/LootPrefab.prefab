@@ -118,6 +118,7 @@ MonoBehaviour:
   magnetRange: 1.5
   Speed: 1.5
   FollowPlayer: 0
+  hasNotBeDropped: 1
 --- !u!114 &-4615194965979015445
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -131,7 +132,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <InventoryItem>k__BackingField: {fileID: 0}
-  <Quantity>k__BackingField: 31
+  <Quantity>k__BackingField: 1
   duration: 0.3
   hasSpaceToBePickUp: 0
 --- !u!58 &1054005708507202236

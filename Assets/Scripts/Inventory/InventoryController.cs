@@ -42,8 +42,11 @@ namespace Inventory
         private Dictionary<InventorySO, UIInventoryPage> _inventoryUI = new Dictionary<InventorySO, UIInventoryPage>();
         private Dictionary<InventorySO, List<InventoryItem>> _initialItems = new Dictionary<InventorySO, List<InventoryItem>>();
 
-        private string lastInventoryRecorded; // A utiliser uniquement lorsque je ne peux pas accéder à l'inventaire survolé par ma souris.
+        private string lastInventoryRecorded = "ToolBarInventory"; // A utiliser uniquement lorsque je ne peux pas accéder à l'inventaire survolé par ma souris.
         private int lastItemSelected;
+
+        // Gestion du drop
+        [SerializeField] private GameObject droppedItemPrefab;
 
         private void Awake()
         {
@@ -177,7 +180,6 @@ namespace Inventory
 
         private void HandleItemClick(int itemIndex)
         {
-           
 
             string InventaireSouris = GetActiveInventoryUnderMouseTag();
             InventoryItem inventoryItem = Inventories[InventaireSouris].GetItemAt(itemIndex);
@@ -226,6 +228,7 @@ namespace Inventory
 
         private void HandleItemActionRequested(int itemIndex)
         {
+            
             string InventaireSouris = GetActiveInventoryUnderMouseTag();
             InventoryItem inventoryItem = Inventories[lastInventoryRecorded].GetItemAt(itemIndex);
             UIInventoryPage UIinventory = _inventoryUI[Inventories[lastInventoryRecorded]]; // j'obtiens l'UI relié à mon inventaire
@@ -256,6 +259,14 @@ namespace Inventory
         {
             /*string InventaireSouris = GetActiveInventoryUnderMouseTag();*/
             UIInventoryPage UIinventory = _inventoryUI[Inventories[lastInventoryRecorded]]; // j'obtiens l'UI relié à mon inventaire
+            for (int i = 0; i<quantity; i++)
+            {
+                GameObject lootGameObject = Instantiate(droppedItemPrefab, new Vector2(transform.position.x + 1f, 
+                    transform.position.y + 1f), Quaternion.identity);
+                lootGameObject.GetComponent<Item>().InventoryItem = Inventories[lastInventoryRecorded].GetItemAt(itemIndex).item;
+                lootGameObject.GetComponent<Loot>().hasNotBeDropped = false;
+                lootGameObject.GetComponent<SpriteRenderer>().sprite = Inventories[lastInventoryRecorded].GetItemAt(itemIndex).item.lootSprite;
+            }
             Inventories[lastInventoryRecorded].RemoveItem(itemIndex, quantity);
             UIinventory.ResetSelection();   
         }
@@ -296,14 +307,23 @@ namespace Inventory
             }
             else
             {
-                Debug.Log("itemIndex1 " + indexOfLastItemDragged + ", itemIndex2 " + itemIndex_2);
+/*                Debug.Log("itemIndex1 " + indexOfLastItemDragged + ", itemIndex2 " + itemIndex_2);
                 Debug.Log("Swap Between inventories");
-                Debug.Log("Inventaire 1 " + lastOverhauledInventory + ", Inventaire 2 " + InventaireSouris);
-                List<InventoryItem> Inventories1Item = Inventories[lastOverhauledInventory].inventoryItems;
-                List<InventoryItem> Inventories2Item = Inventories[InventaireSouris].inventoryItems;
-                Inventories[InventaireSouris].SwapItemsBetweenInventories(indexOfLastItemDragged, Inventories1Item, 
-                    itemIndex_2, Inventories2Item);
-                Inventories[lastOverhauledInventory].InformAboutChange();
+                Debug.Log("Inventaire 1 " + lastOverhauledInventory + ", Inventaire 2 " + InventaireSouris);*/
+                if (InventaireSouris == null)
+                {
+                    DropItem(itemIndex_1, Inventories[InventaireSouris].GetItemAt(itemIndex_1).quantity);
+
+                }
+                else
+                {
+                    List<InventoryItem> Inventories1Item = Inventories[lastOverhauledInventory].inventoryItems;
+                    List<InventoryItem> Inventories2Item = Inventories[InventaireSouris].inventoryItems;
+                    Inventories[InventaireSouris].SwapItemsBetweenInventories(indexOfLastItemDragged, Inventories1Item,
+                        itemIndex_2, Inventories2Item);
+                    Inventories[lastOverhauledInventory].InformAboutChange();
+                }
+
 
             }
             
@@ -351,9 +371,9 @@ namespace Inventory
 /*                    activeInventories.Remove("MainInventory");*/
                     inventoryUI.Hide();
                     string description = PrepareDescription(Inventories["ToolbarInventory"].GetItemAt(0));
-                    inventoryUIBar.UdpateClick(0, description); // Lorsque que la
+                    inventoryUIBar.UdpateClick(lastItemSelected, description); // Lorsque que la
                     inventoryUIIsOpen = false;
-                    lastItemSelected = 0;
+                    /*lastItemSelected = 0;*/
                 }
 
             }
@@ -415,13 +435,17 @@ namespace Inventory
 
                 if (inventoryImage != null && inventoryImage.raycastTarget)
                 {
-                    if (result.gameObject.GetComponent<UIInventoryPage>() != null) return result.gameObject.tag;
+                    if (result.gameObject.GetComponent<UIInventoryPage>() != null)
+                    {
+                        lastInventoryRecorded = result.gameObject.tag;
+                        return result.gameObject.tag;
+                    }
                     GameObject parent = result.gameObject.transform.parent.gameObject;
                     while (parent != null && parent.GetComponent<UIInventoryPage>() == null)
                     {
-                        parent = parent.transform.parent?.gameObject;
+                        parent = parent.transform.parent.gameObject;
                     }
-                    lastInventoryRecorded = parent?.tag;
+                    if (parent!= null) lastInventoryRecorded = parent.tag;
                     return parent.tag; // La souris est au-dessus de cet inventaire
                 }
             }
