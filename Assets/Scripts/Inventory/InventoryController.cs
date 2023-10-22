@@ -30,6 +30,8 @@ namespace Inventory
 
         [SerializeField] private InventorySO mainInventoryData;
         [SerializeField] private InventorySO toolbarInventoryData;
+        private string lastOverhauledInventory;
+        private int indexOfLastItemDragged;
 
         [HideInInspector] public bool inventoryUIIsOpen;
         public List<InventoryItem> initialItems = new List<InventoryItem>();
@@ -74,8 +76,8 @@ namespace Inventory
             PrepareInventoryData();
 
             string description = PrepareDescription(Inventories["ToolbarInventory"].GetItemAt(0));
-            inventoryUIBar.UdpateClick(0, description);
             inventoryUIBar.Show();
+            inventoryUIBar.UdpateClick(0, description);
 
             foreach (var inventoryEntry in Inventories)
             {
@@ -89,10 +91,14 @@ namespace Inventory
 
         }
 
-        public void Update()
+/*        public void Update()
         {
-            Debug.Log(GetActiveInventoryUnderMouseTag());
-        }
+            if (GetActiveInventoryUnderMouseTag() != null)
+            {
+                
+            }
+                
+        }*/
 
 
         /*        private void PrepareInventoryData()
@@ -112,7 +118,7 @@ namespace Inventory
                     }
                 }*/
 
-                private void PrepareInventoryData()
+        private void PrepareInventoryData()
                 {
                     foreach (var inventoryEntry in Inventories)
                     {
@@ -172,51 +178,50 @@ namespace Inventory
         private void HandleItemClick(int itemIndex)
         {
            
-            if (inventoryUI.isActiveAndEnabled)
+
+            string InventaireSouris = GetActiveInventoryUnderMouseTag();
+            InventoryItem inventoryItem = Inventories[InventaireSouris].GetItemAt(itemIndex);
+            UIInventoryPage UIinventory = _inventoryUI[Inventories[InventaireSouris]]; // j'obtiens l'UI relié à mon inventaire
+            if (inventoryItem.IsEmpty)
             {
-                string InventaireSouris = GetActiveInventoryUnderMouseTag();
-                InventoryItem inventoryItem = Inventories[InventaireSouris].GetItemAt(itemIndex);
-                UIInventoryPage UIinventory = _inventoryUI[Inventories[InventaireSouris]]; // j'obtiens l'UI relié à mon inventaire
-                if (inventoryItem.IsEmpty)
+                foreach(var inventory in Inventories)
                 {
-                    foreach(var inventory in Inventories)
-                    {
-                        _inventoryUI[inventory.Value].ResetSelection();
-                    }
-                    return;
+                    _inventoryUI[inventory.Value].ResetSelection();
                 }
-                LootFortune item = inventoryItem.item;
-                string description = PrepareDescription(inventoryItem);
-                UIinventory.UdpateClick(itemIndex, description);
-                foreach (var UI in _inventoryUI)
+                return;
+            }
+            LootFortune item = inventoryItem.item;
+            string description = PrepareDescription(inventoryItem);
+            if (InventaireSouris == "ToolbarInventory") lastItemSelected = itemIndex;
+            UIinventory.UdpateClick(itemIndex, description);
+            foreach (var UI in _inventoryUI)
+            {
+                if (UI.Value != UIinventory)
                 {
-                    if (UI.Value != UIinventory)
-                    {
-                        UI.Value.ResetSelection();
-                    }
+                    UI.Value.ResetSelection();
                 }
             }
-            else
-            {
-                
-                
-            }
+
         }
 
 
         private string PrepareDescription(InventoryItem inventoryItem)
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append(inventoryItem.item.lootName);
-            sb.AppendLine();
-            for (int i = 0; i < inventoryItem.itemState.Count; i++)
+            if (inventoryItem.item != null)
             {
-                sb.Append($"{inventoryItem.itemState[i].itemParameter.parameterName} : " +
-                    $"{inventoryItem.itemState[i].value} /" +
-                    $" {inventoryItem.item.DefaultParametersList[i].value}");
+                sb.Append(inventoryItem.item.lootName);
                 sb.AppendLine();
+                for (int i = 0; i < inventoryItem.itemState.Count; i++)
+                {
+                    sb.Append($"{inventoryItem.itemState[i].itemParameter.parameterName} : " +
+                        $"{inventoryItem.itemState[i].value} /" +
+                        $" {inventoryItem.item.DefaultParametersList[i].value}");
+                    sb.AppendLine();
+                }
+                return sb.ToString();
             }
-            return sb.ToString();
+            return null;
         }
 
         private void HandleItemActionRequested(int itemIndex)
@@ -283,8 +288,25 @@ namespace Inventory
 
         private void HandleSwapItems(int itemIndex_1, int itemIndex_2)
         {
+
             string InventaireSouris = GetActiveInventoryUnderMouseTag();
-            Inventories[InventaireSouris].SwapItems(itemIndex_1, itemIndex_2);
+            if (InventaireSouris == lastOverhauledInventory)
+            {
+                Inventories[InventaireSouris].SwapItems(itemIndex_1, itemIndex_2);
+            }
+            else
+            {
+                Debug.Log("itemIndex1 " + indexOfLastItemDragged + ", itemIndex2 " + itemIndex_2);
+                Debug.Log("Swap Between inventories");
+                Debug.Log("Inventaire 1 " + lastOverhauledInventory + ", Inventaire 2 " + InventaireSouris);
+                List<InventoryItem> Inventories1Item = Inventories[lastOverhauledInventory].inventoryItems;
+                List<InventoryItem> Inventories2Item = Inventories[InventaireSouris].inventoryItems;
+                Inventories[InventaireSouris].SwapItemsBetweenInventories(indexOfLastItemDragged, Inventories1Item, 
+                    itemIndex_2, Inventories2Item);
+                Inventories[lastOverhauledInventory].InformAboutChange();
+
+            }
+            
 
             /*inventoryData.SwapItems(itemIndex_1, itemIndex_2);*/
         }
@@ -292,7 +314,9 @@ namespace Inventory
         private void HandleDragging(int itemIndex)
         {
             string InventaireSouris = GetActiveInventoryUnderMouseTag();
+            lastOverhauledInventory = InventaireSouris;
             InventoryItem inventoryItem = Inventories[InventaireSouris].GetItemAt(itemIndex);
+            indexOfLastItemDragged = itemIndex;
             UIInventoryPage UIinventory = _inventoryUI[Inventories[InventaireSouris]]; // j'obtiens l'UI relié à mon inventaire
             if (inventoryItem.IsEmpty) return;
             UIinventory.CreateDraggedItem(inventoryItem.item.lootSprite, inventoryItem.quantity);
@@ -358,9 +382,9 @@ namespace Inventory
                     }
                     if (lastItemSelected < 0)
                     {
-                        lastItemSelected = GetItemsNumber("ToolbarInventory") - 1;
+                        lastItemSelected = Inventories["ToolbarInventory"].inventoryItems.Count - 1;
                     }
-                    else if (lastItemSelected > GetItemsNumber("ToolbarInventory") - 1)
+                    else if (lastItemSelected > Inventories["ToolbarInventory"].inventoryItems.Count - 1)
                     {
                         lastItemSelected = 0;
                     }
@@ -371,7 +395,7 @@ namespace Inventory
 
             }
         }
-        private string GetActiveInventoryUnderMouseTag() // Renvoie le nom de l'inventaire au dessus duquel je passe ma souris
+        public string GetActiveInventoryUnderMouseTag() // Renvoie le nom de l'inventaire au dessus duquel je passe ma souris
         {
             Vector2 mousePosition = Input.mousePosition;
             PointerEventData pointerData = new PointerEventData(EventSystem.current)
@@ -417,7 +441,6 @@ namespace Inventory
                 }
             }
             return numberItems;
-
         }
         private void OnEnable()
         {

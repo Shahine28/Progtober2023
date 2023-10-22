@@ -136,7 +136,16 @@ namespace Inventory.Model
             InformAboutChange();
         }
 
-        private void InformAboutChange()
+        public void SwapItemsBetweenInventories (int itemIndex_1, List<InventoryItem> inventory1Items, int itemIndex_2, List<InventoryItem> inventory2Items)
+        {
+            
+            InventoryItem item1 = inventory1Items[itemIndex_1];
+            inventory1Items[itemIndex_1] = inventory2Items[itemIndex_2];
+            inventory2Items[itemIndex_2] = item1;
+            InformAboutChange();
+        }
+
+        public void InformAboutChange()
         {
             OnInventoryUpdated?.Invoke(GetCurrentInventoryState());
         }

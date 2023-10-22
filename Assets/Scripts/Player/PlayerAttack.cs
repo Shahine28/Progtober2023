@@ -40,7 +40,7 @@ public class PlayerAttack : MonoBehaviour
         if (context.performed)
         {
             /*Debug.Log("J'appuie");*/
-            if (!GetComponent<InventoryController>().inventoryUIIsOpen)
+            if (!GetComponent<InventoryController>().inventoryUIIsOpen && GetComponent<InventoryController>().GetActiveInventoryUnderMouseTag() == null)
             {
                 Attack();
             }
