@@ -374,6 +374,7 @@ GameObject:
   - component: {fileID: 242451359242801138}
   - component: {fileID: 5879302283500220249}
   - component: {fileID: 1078967297481640184}
+  - component: {fileID: 4188362849052957273}
   m_Layer: 5
   m_Name: ShopItemPanel
   m_TagString: Untagged
@@ -441,6 +442,21 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &4188362849052957273
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6791761820959697471}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24427152df9ab1a4bbeb0a80e6b966b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  imageItem: {fileID: 650105056686024446}
+  nameItem: {fileID: 6707921795359503747}
+  prixItem: {fileID: 4781748618170088862}
 --- !u!1 &8366847289225968326
 GameObject:
   m_ObjectHideFlags: 0
