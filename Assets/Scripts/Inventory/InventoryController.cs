@@ -25,6 +25,7 @@ namespace Inventory
 
 
         [SerializeField] private UIInventoryPage inventoryUI;
+        public UIInventoryPage MainInventaire => inventoryUI;
         [SerializeField] private UIInventoryPage inventoryUIBar;
         [SerializeField] private InputGame _playerInput;
 
