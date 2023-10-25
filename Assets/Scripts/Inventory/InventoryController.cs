@@ -300,36 +300,84 @@ namespace Inventory
 
         private void HandleSwapItems(int itemIndex_1, int itemIndex_2)
         {
-
             string InventaireSouris = GetActiveInventoryUnderMouseTag();
             if (InventaireSouris == lastOverhauledInventory)
             {
-                Inventories[InventaireSouris].SwapItems(itemIndex_1, itemIndex_2);
+                if (AreItemsOfSameType(itemIndex_1, Inventories[lastOverhauledInventory], itemIndex_2, Inventories[InventaireSouris]))
+                {
+                    AddItemsOfSameType(itemIndex_1, itemIndex_2, Inventories[lastOverhauledInventory], Inventories[lastOverhauledInventory]);
+                }
+                else
+                {
+                    Inventories[InventaireSouris].SwapItems(itemIndex_1, itemIndex_2);
+                }
             }
             else
             {
 /*                Debug.Log("itemIndex1 " + indexOfLastItemDragged + ", itemIndex2 " + itemIndex_2);
                 Debug.Log("Swap Between inventories");
                 Debug.Log("Inventaire 1 " + lastOverhauledInventory + ", Inventaire 2 " + InventaireSouris);*/
-                if (InventaireSouris == null)
+                if (AreItemsOfSameType(indexOfLastItemDragged, Inventories[lastOverhauledInventory], itemIndex_2, Inventories[InventaireSouris]))
                 {
-                    DropItem(itemIndex_1, Inventories[InventaireSouris].GetItemAt(itemIndex_1).quantity);
+                    Debug.Log("Swap entre deux inventaire aveec items même type");
+                    AddItemsOfSameType(indexOfLastItemDragged, itemIndex_2, Inventories[lastOverhauledInventory], Inventories[InventaireSouris]);
+                }
+                else
+                {
+                    if (InventaireSouris == null)
+                    {
+                        DropItem(itemIndex_1, Inventories[InventaireSouris].GetItemAt(itemIndex_1).quantity);
+
+                    }
+                    else
+                    {
+                        List<InventoryItem> Inventories1Item = Inventories[lastOverhauledInventory].inventoryItems;
+                        List<InventoryItem> Inventories2Item = Inventories[InventaireSouris].inventoryItems;
+                        Inventories[InventaireSouris].SwapItemsBetweenInventories(indexOfLastItemDragged, Inventories1Item,
+                            itemIndex_2, Inventories2Item);
+                        Inventories[lastOverhauledInventory].InformAboutChange();
+                    }
+                }
+
+
+
+            }
+            /*inventoryData.SwapItems(itemIndex_1, itemIndex_2);*/
+        }
+        private void AddItemsOfSameType(int itemIndex_arrive, int itemIndex_depart, InventorySO inventory2, InventorySO inventory1)
+        {
+            if (inventory1.GetItemAt(itemIndex_depart).item == inventory2.GetItemAt(itemIndex_arrive).item)
+            {
+                Debug.Log("Les deux articles ont le même type, ajoutons-les ensemble.");
+                // Les deux articles ont le même type, ajoutons-les ensemble.
+                int totalQuantity = inventory1.inventoryItems[itemIndex_depart].quantity + inventory2.inventoryItems[itemIndex_arrive].quantity;
+                if (totalQuantity <= inventory1.inventoryItems[itemIndex_depart].item.MaxStackSize)
+                {
+                    Debug.Log(totalQuantity);
+                    // La quantité totale reste dans la limite de la pile.
+                    inventory1.inventoryItems[itemIndex_depart] = inventory1.inventoryItems[itemIndex_depart].ChangeQuantity(totalQuantity);
+                    inventory2.inventoryItems[itemIndex_arrive] = InventoryItem.GetEmptyItem();// Supprime l'autre article.
+                    inventory1.InformAboutChange();
+                    inventory2.InformAboutChange();
+
 
                 }
                 else
                 {
-                    List<InventoryItem> Inventories1Item = Inventories[lastOverhauledInventory].inventoryItems;
-                    List<InventoryItem> Inventories2Item = Inventories[InventaireSouris].inventoryItems;
-                    Inventories[InventaireSouris].SwapItemsBetweenInventories(indexOfLastItemDragged, Inventories1Item,
-                        itemIndex_2, Inventories2Item);
-                    Inventories[lastOverhauledInventory].InformAboutChange();
+                    // La quantité totale dépasse la limite de la pile.
+                    inventory1.inventoryItems[itemIndex_depart] = inventory1.inventoryItems[itemIndex_depart].ChangeQuantity(inventory1.GetItemAt(itemIndex_depart).item.MaxStackSize);
+                    inventory2.inventoryItems[itemIndex_arrive] = inventory2.inventoryItems[itemIndex_arrive].ChangeQuantity(totalQuantity - inventory2.GetItemAt(itemIndex_depart).item.MaxStackSize);
+                    inventory1.InformAboutChange();
+                    inventory2.InformAboutChange();
                 }
-
-
             }
-            
+        }
+        public bool AreItemsOfSameType(int itemIndex1, InventorySO inventory1, int itemIndex2, InventorySO inventory2)
+        {
 
-            /*inventoryData.SwapItems(itemIndex_1, itemIndex_2);*/
+            InventoryItem item1 = inventory1.inventoryItems[itemIndex1];
+            InventoryItem item2 = inventory2.inventoryItems[itemIndex2];
+            return item1.item == item2.item;
         }
 
         private void HandleDragging(int itemIndex)
