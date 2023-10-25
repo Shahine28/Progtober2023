@@ -29,32 +29,36 @@ public class InventoryPickUpSystem : MonoBehaviour
             Item item = collision.GetComponent<Item>();
             if (item != null)
             {
-                int reminder;
-                if (!toolbarInventoryData.IsInventoryFull())
-                {
-                    reminder = toolbarInventoryData.AddItem(item.InventoryItem, item.Quantity);
-                    if (reminder == 0)
-                    {
-                        StartCoroutine(item.AnimateItemPickup());
-                    }
-                    else
-                    {
-                        item.Quantity = reminder;
-                    }
-                }
-                else
-                {
-                    reminder = mainInventoryData.AddItem(item.InventoryItem, item.Quantity);
-                    if (reminder == 0)
-                    {
-                        StartCoroutine(item.AnimateItemPickup());
-                    }
-                    else
-                    {
-                        item.Quantity = reminder;
-                    }
-                }
+                AddItem(item);
+            }
+        }
+    }
 
+    public void AddItem(Item item)
+    {
+        int reminder;
+        if (!toolbarInventoryData.IsInventoryFull())
+        {
+            reminder = toolbarInventoryData.AddItem(item.InventoryItem, item.Quantity);
+            if (reminder == 0)
+            {
+                StartCoroutine(item.AnimateItemPickup());
+            }
+            else
+            {
+                item.Quantity = reminder;
+            }
+        }
+        else
+        {
+            reminder = mainInventoryData.AddItem(item.InventoryItem, item.Quantity);
+            if (reminder == 0)
+            {
+                StartCoroutine(item.AnimateItemPickup());
+            }
+            else
+            {
+                item.Quantity = reminder;
             }
         }
     }

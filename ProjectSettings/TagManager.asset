@@ -9,6 +9,7 @@ TagManager:
   - Coin5
   - CheckPoint
   - Item
+  - ShopPanel
   layers:
   - Default
   - TransparentFX

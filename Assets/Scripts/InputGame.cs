@@ -89,6 +89,15 @@ public partial class @InputGame: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Escape"",
+                    ""type"": ""Button"",
+                    ""id"": ""0ddda14f-e315-4563-bd65-c59452e57f32"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -353,6 +362,17 @@ public partial class @InputGame: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""MouseScrollY"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""81989359-8ba2-4d98-9cb3-0a6fba038ee2"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Escape"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -947,6 +967,7 @@ public partial class @InputGame: IInputActionCollection2, IDisposable
         m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
         m_Player_Inventory = m_Player.FindAction("Inventory", throwIfNotFound: true);
         m_Player_MouseScrollY = m_Player.FindAction("MouseScrollY", throwIfNotFound: true);
+        m_Player_Escape = m_Player.FindAction("Escape", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1027,6 +1048,7 @@ public partial class @InputGame: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Jump;
     private readonly InputAction m_Player_Inventory;
     private readonly InputAction m_Player_MouseScrollY;
+    private readonly InputAction m_Player_Escape;
     public struct PlayerActions
     {
         private @InputGame m_Wrapper;
@@ -1038,6 +1060,7 @@ public partial class @InputGame: IInputActionCollection2, IDisposable
         public InputAction @Jump => m_Wrapper.m_Player_Jump;
         public InputAction @Inventory => m_Wrapper.m_Player_Inventory;
         public InputAction @MouseScrollY => m_Wrapper.m_Player_MouseScrollY;
+        public InputAction @Escape => m_Wrapper.m_Player_Escape;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -1068,6 +1091,9 @@ public partial class @InputGame: IInputActionCollection2, IDisposable
             @MouseScrollY.started += instance.OnMouseScrollY;
             @MouseScrollY.performed += instance.OnMouseScrollY;
             @MouseScrollY.canceled += instance.OnMouseScrollY;
+            @Escape.started += instance.OnEscape;
+            @Escape.performed += instance.OnEscape;
+            @Escape.canceled += instance.OnEscape;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -1093,6 +1119,9 @@ public partial class @InputGame: IInputActionCollection2, IDisposable
             @MouseScrollY.started -= instance.OnMouseScrollY;
             @MouseScrollY.performed -= instance.OnMouseScrollY;
             @MouseScrollY.canceled -= instance.OnMouseScrollY;
+            @Escape.started -= instance.OnEscape;
+            @Escape.performed -= instance.OnEscape;
+            @Escape.canceled -= instance.OnEscape;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -1282,6 +1311,7 @@ public partial class @InputGame: IInputActionCollection2, IDisposable
         void OnJump(InputAction.CallbackContext context);
         void OnInventory(InputAction.CallbackContext context);
         void OnMouseScrollY(InputAction.CallbackContext context);
+        void OnEscape(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {
