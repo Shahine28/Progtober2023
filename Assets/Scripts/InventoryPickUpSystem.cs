@@ -36,6 +36,7 @@ public class InventoryPickUpSystem : MonoBehaviour
 
     public void AddItem(Item item)
     {
+        Debug.Log("Ajout");
         int reminder;
         if (!toolbarInventoryData.IsInventoryFull())
         {
@@ -60,6 +61,20 @@ public class InventoryPickUpSystem : MonoBehaviour
             {
                 item.Quantity = reminder;
             }
+        }
+    }
+
+    public void AddItemFromShop(Item item)
+    {
+        Debug.Log("Ajout");
+        int reminder;
+        if (!toolbarInventoryData.IsInventoryFull())
+        {
+            reminder = toolbarInventoryData.AddItem(item.InventoryItem, item.Quantity);
+        }
+        else
+        {
+            reminder = mainInventoryData.AddItem(item.InventoryItem, item.Quantity);
         }
     }
 }

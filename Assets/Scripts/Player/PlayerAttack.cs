@@ -41,7 +41,9 @@ public class PlayerAttack : MonoBehaviour
         {
 /*            Debug.Log(GetComponent<InventoryController>().GetActiveInventoryUnderMouseTag());*/
             /*Debug.Log("J'appuie");*/
-            if (!GetComponent<InventoryController>().MainInventaire.isActiveAndEnabled && GetComponent<InventoryController>().GetActiveInventoryUnderMouseTag() == null)
+            if (!GetComponent<InventoryController>().MainInventaire.isActiveAndEnabled
+                && !GameObject.FindGameObjectWithTag("ShopPanel").GetComponent<UI_Shop>().isActiveAndEnabled
+                && GetComponent<InventoryController>().GetActiveInventoryUnderMouseTag() != "ToolbarInventory")
             {
                 Attack();
             }

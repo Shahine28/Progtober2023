@@ -36,6 +36,7 @@ public class UI_Shop : MonoBehaviour
         itemButton.imageItem.sprite = sprite;
         itemButton.nameItem.text = itemName;
         itemButton.prixItem.text = itemCost.ToString();
+        itemButton.prix = itemCost;
         itemButton.index = index;
         itemButton.transform.SetParent(contentPanel);
         itemButton.GetComponent<Item>().InventoryItem = lootData;
@@ -43,15 +44,12 @@ public class UI_Shop : MonoBehaviour
 
     public void BuyItem(UI_ShopItem itemButton)
     {
-        Debug.Log("cliked");
         if (itemButton != null)
         {
-            Debug.Log("cliked2");
             if (itemButton.prix <= goldCount.Gold)
             {
-                Debug.Log("cliked3");
                 goldCount.Gold -= itemButton.prix;
-                inventoryPickUp.AddItem(itemButton.GetComponent<Item>());
+                inventoryPickUp.AddItemFromShop(itemButton.GetComponent<Item>());
             }
         }
     }
@@ -86,7 +84,7 @@ public class UI_Shop : MonoBehaviour
     #region Show/Hide
     public void Show()
     {
-        if (!shopParent.activeInHierarchy)
+        if (!shopParent.activeSelf)
         {
             shopParent.SetActive(true);
         }
