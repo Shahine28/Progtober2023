@@ -44,7 +44,9 @@ namespace Inventory
         private Dictionary<InventorySO, List<InventoryItem>> _initialItems = new Dictionary<InventorySO, List<InventoryItem>>();
 
         private string lastInventoryRecorded = "ToolBarInventory"; // A utiliser uniquement lorsque je ne peux pas accéder à l'inventaire survolé par ma souris.
+        private string lastInventoryClickedOn;
         private int lastItemSelected;
+        public int lastSelectedItemWithMouse;
 
         // Gestion du drop
         [SerializeField] private GameObject droppedItemPrefab;
@@ -52,6 +54,7 @@ namespace Inventory
         [Header("Gestion des différents panels")]
         public GameObject MainInventoryPanel;
         public GameObject ShopPanel;
+        public GameObject RemoveQuantityPanel;
 
         private void Awake()
         {
@@ -193,6 +196,7 @@ namespace Inventory
         {
 
             string InventaireSouris = GetActiveInventoryUnderMouseTag();
+            lastInventoryClickedOn = InventaireSouris;
             InventoryItem inventoryItem = Inventories[InventaireSouris].GetItemAt(itemIndex);
             UIInventoryPage UIinventory = _inventoryUI[Inventories[InventaireSouris]]; // j'obtiens l'UI relié à mon inventaire
             if (inventoryItem.IsEmpty)
@@ -254,6 +258,7 @@ namespace Inventory
                     _inventoryUI[inventory.Value].ResetSelection();
                 }
                 UIinventory.listOfUIItems[itemIndex].Select();
+                lastSelectedItemWithMouse = itemIndex;
                 UIinventory.ShowItemActions(itemIndex);
                 UIinventory.AddAction(itemAction.ActionName, () => PerformAction(itemIndex));
             }
@@ -414,7 +419,15 @@ namespace Inventory
             inventory.inventoryItems[itemIndex] = inventory.inventoryItems[itemIndex].ChangeQuantity(inventory.inventoryItems[itemIndex].quantity - removedQuantity);
             inventory.AddItem(inventory.inventoryItems[itemIndex].item, removedQuantity);
         }
-
+        public void Split(InputAction.CallbackContext context)
+        {
+            if (context.performed && MainInventoryPanel.activeSelf && !Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse].IsEmpty && Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse].item.IsStackable)
+            {
+                RemoveQuantityPanel.transform.GetChild(0).GetComponent<UI_QuantityPanel>().item = Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse];
+                RemoveQuantityPanel.transform.GetChild(0).GetComponent<UI_QuantityPanel>().slider.maxValue = Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse].quantity;
+                RemoveQuantityPanel.SetActive(true);
+            }
+        }
         public void inventory(InputAction.CallbackContext context)
         {
             if (context.performed && !ShopPanel.activeSelf)
@@ -453,7 +466,7 @@ namespace Inventory
 
         public void HideInventory(InputAction.CallbackContext context)
         {
-            if (context.performed && inventoryUI.isActiveAndEnabled)
+            if (context.performed && inventoryUI.isActiveAndEnabled && !RemoveQuantityPanel.activeSelf)
             {
                 inventoryUI.Hide();
             }

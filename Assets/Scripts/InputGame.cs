@@ -98,6 +98,24 @@ public partial class @InputGame: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Submit"",
+                    ""type"": ""Button"",
+                    ""id"": ""101a934d-1469-40fe-a225-a8aa76df3e6d"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SplitQuantity"",
+                    ""type"": ""Button"",
+                    ""id"": ""9df7c5c9-a456-47ff-a836-b057d021326e"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -338,7 +356,7 @@ public partial class @InputGame: IInputActionCollection2, IDisposable
                     ""path"": ""<Keyboard>/space"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": """",
+                    ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""Jump"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
@@ -349,7 +367,7 @@ public partial class @InputGame: IInputActionCollection2, IDisposable
                     ""path"": ""<Keyboard>/i"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": """",
+                    ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""Inventory"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
@@ -360,7 +378,7 @@ public partial class @InputGame: IInputActionCollection2, IDisposable
                     ""path"": ""<Mouse>/scroll/y"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": """",
+                    ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""MouseScrollY"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
@@ -371,8 +389,30 @@ public partial class @InputGame: IInputActionCollection2, IDisposable
                     ""path"": ""<Keyboard>/escape"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": """",
+                    ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""Escape"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""d07c78a1-d044-48cb-ab83-439499179da2"",
+                    ""path"": ""<Keyboard>/enter"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Submit"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8028f388-f9b4-4a65-ad5c-9a5bfcbba42b"",
+                    ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""SplitQuantity"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -741,10 +781,10 @@ public partial class @InputGame: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""9e92bb26-7e3b-4ec4-b06b-3c8f8e498ddc"",
-                    ""path"": ""*/{Submit}"",
+                    ""path"": ""<Keyboard>/enter"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse;Gamepad;Touch;Joystick;XR"",
+                    ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""Submit"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
@@ -968,6 +1008,8 @@ public partial class @InputGame: IInputActionCollection2, IDisposable
         m_Player_Inventory = m_Player.FindAction("Inventory", throwIfNotFound: true);
         m_Player_MouseScrollY = m_Player.FindAction("MouseScrollY", throwIfNotFound: true);
         m_Player_Escape = m_Player.FindAction("Escape", throwIfNotFound: true);
+        m_Player_Submit = m_Player.FindAction("Submit", throwIfNotFound: true);
+        m_Player_SplitQuantity = m_Player.FindAction("SplitQuantity", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1049,6 +1091,8 @@ public partial class @InputGame: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Inventory;
     private readonly InputAction m_Player_MouseScrollY;
     private readonly InputAction m_Player_Escape;
+    private readonly InputAction m_Player_Submit;
+    private readonly InputAction m_Player_SplitQuantity;
     public struct PlayerActions
     {
         private @InputGame m_Wrapper;
@@ -1061,6 +1105,8 @@ public partial class @InputGame: IInputActionCollection2, IDisposable
         public InputAction @Inventory => m_Wrapper.m_Player_Inventory;
         public InputAction @MouseScrollY => m_Wrapper.m_Player_MouseScrollY;
         public InputAction @Escape => m_Wrapper.m_Player_Escape;
+        public InputAction @Submit => m_Wrapper.m_Player_Submit;
+        public InputAction @SplitQuantity => m_Wrapper.m_Player_SplitQuantity;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -1094,6 +1140,12 @@ public partial class @InputGame: IInputActionCollection2, IDisposable
             @Escape.started += instance.OnEscape;
             @Escape.performed += instance.OnEscape;
             @Escape.canceled += instance.OnEscape;
+            @Submit.started += instance.OnSubmit;
+            @Submit.performed += instance.OnSubmit;
+            @Submit.canceled += instance.OnSubmit;
+            @SplitQuantity.started += instance.OnSplitQuantity;
+            @SplitQuantity.performed += instance.OnSplitQuantity;
+            @SplitQuantity.canceled += instance.OnSplitQuantity;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -1122,6 +1174,12 @@ public partial class @InputGame: IInputActionCollection2, IDisposable
             @Escape.started -= instance.OnEscape;
             @Escape.performed -= instance.OnEscape;
             @Escape.canceled -= instance.OnEscape;
+            @Submit.started -= instance.OnSubmit;
+            @Submit.performed -= instance.OnSubmit;
+            @Submit.canceled -= instance.OnSubmit;
+            @SplitQuantity.started -= instance.OnSplitQuantity;
+            @SplitQuantity.performed -= instance.OnSplitQuantity;
+            @SplitQuantity.canceled -= instance.OnSplitQuantity;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -1312,6 +1370,8 @@ public partial class @InputGame: IInputActionCollection2, IDisposable
         void OnInventory(InputAction.CallbackContext context);
         void OnMouseScrollY(InputAction.CallbackContext context);
         void OnEscape(InputAction.CallbackContext context);
+        void OnSubmit(InputAction.CallbackContext context);
+        void OnSplitQuantity(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {

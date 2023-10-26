@@ -159,6 +159,7 @@ namespace Inventory.UI
         {
             DeselectAllItems();
             listOfUIItems[itemIndex].Select();
+            GameObject.FindGameObjectWithTag("Player").GetComponent<InventoryController>().lastSelectedItemWithMouse = itemIndex;
             if (description != null)
             {
                 Debug.Log(description);
