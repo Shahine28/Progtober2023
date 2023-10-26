@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using TMPro;
+using TreeEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -84,11 +85,14 @@ public class UI_Shop : MonoBehaviour
     #region Show/Hide
     public void Show()
     {
-        if (!shopParent.activeSelf)
+        Debug.Log(GameObject.FindGameObjectWithTag("Player").GetComponent<InventoryController>().MainInventoryPanel.activeSelf);
+        if (!GameObject.FindGameObjectWithTag("Player").GetComponent<InventoryController>().MainInventoryPanel.activeSelf)
         {
-            shopParent.SetActive(true);
+            // Inverse l'état de visibilité de shopParent
+            shopParent.SetActive(!shopParent.activeSelf);
         }
-        
+
+
     }
 
     public void Hide()

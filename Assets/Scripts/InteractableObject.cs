@@ -40,23 +40,15 @@ public class InteractableObject : MonoBehaviour
         Collider2D[] zoneInterraction = Physics2D.OverlapCircleAll(transform.position, ZoneInterraction);
         foreach (Collider2D collision in zoneInterraction)
         {
-            if (collision.gameObject.tag == "Player")
+            if (collision.gameObject.tag == "Player" && collision.isTrigger)
             {
                 toucheEInstance.SetActive(true);
-                if(toucheEIsPressed)
-                {
-                    isUsed = true;
-                    hasBeenUsed = true;
-                    Event.Invoke();
-                    
-                }
+            }
+            if (isUsed)
+            {
+                if (!toucheEIsPressed) isUsed = false;
             }
         }
-        if(isUsed)
-        {
-            if (!toucheEIsPressed) isUsed = false;
-        }
-       if (toucheEIsPressed) toucheEIsPressed = false;
     }
 
     private void OnEnable()
@@ -74,7 +66,20 @@ public class InteractableObject : MonoBehaviour
 
     private void Interract(InputAction.CallbackContext context)
     {
-        toucheEIsPressed = true;
+        if (toucheEInstance.activeSelf)
+        {
+            if (context.performed)
+            {
+                toucheEIsPressed = true;
+                isUsed = true;
+                hasBeenUsed = true;
+                this.Event.Invoke();
+            }
+            else if (context.canceled)
+            {
+                toucheEIsPressed = false;
+            }
+        }
     }
 
     private void OnDrawGizmos()

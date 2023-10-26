@@ -10,7 +10,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("Movement")]
     [SerializeField]
     private float _speed;
-    private Rigidbody2D _rigidbody;
+    public Rigidbody2D _rigidbody;
     private Vector2 _movementInput;
     private Vector2 _smoothedMovementInput;
     private Vector2 _movementInputSmoothVelocity;
@@ -29,7 +29,7 @@ public class PlayerMovement : MonoBehaviour
     bool canDash;
 
     [Header("Animation")]
-    [SerializeField] Animator _animator;
+    public Animator _animator;
     private bool _LookRight;
 
     [HideInInspector] public bool usedTP;

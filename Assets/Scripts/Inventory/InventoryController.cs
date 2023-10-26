@@ -49,6 +49,10 @@ namespace Inventory
         // Gestion du drop
         [SerializeField] private GameObject droppedItemPrefab;
 
+        [Header("Gestion des différents panels")]
+        public GameObject MainInventoryPanel;
+        public GameObject ShopPanel;
+
         private void Awake()
         {
             _playerInput = new InputGame();
@@ -95,14 +99,20 @@ namespace Inventory
 
         }
 
-/*        public void Update()
+        public void Update()
         {
-            if (GetActiveInventoryUnderMouseTag() != null)
+            if (MainInventoryPanel.activeSelf || ShopPanel.activeSelf)
             {
-                
+                GetComponent<PlayerMovement>()._animator.SetFloat("Speed", 0);
+                GetComponent<PlayerMovement>()._rigidbody.velocity = Vector2.zero;
+                GetComponent<PlayerMovement>().enabled = false;
             }
-                
-        }*/
+            else if (!MainInventoryPanel.activeSelf && !ShopPanel.activeSelf)
+            {
+                GetComponent<PlayerMovement>().enabled = true;
+            }
+
+        }
 
 
         /*        private void PrepareInventoryData()
@@ -303,7 +313,7 @@ namespace Inventory
             string InventaireSouris = GetActiveInventoryUnderMouseTag();
             if (InventaireSouris == lastOverhauledInventory)
             {
-                if (AreItemsOfSameType(itemIndex_1, Inventories[lastOverhauledInventory], itemIndex_2, Inventories[InventaireSouris]))
+                if (AreItemsOfSameTypeAndAreStackable(itemIndex_1, Inventories[lastOverhauledInventory], itemIndex_2, Inventories[InventaireSouris]))
                 {
                     AddItemsOfSameType(itemIndex_1, itemIndex_2, Inventories[lastOverhauledInventory], Inventories[lastOverhauledInventory]);
                 }
@@ -317,26 +327,25 @@ namespace Inventory
 /*                Debug.Log("itemIndex1 " + indexOfLastItemDragged + ", itemIndex2 " + itemIndex_2);
                 Debug.Log("Swap Between inventories");
                 Debug.Log("Inventaire 1 " + lastOverhauledInventory + ", Inventaire 2 " + InventaireSouris);*/
-                if (AreItemsOfSameType(indexOfLastItemDragged, Inventories[lastOverhauledInventory], itemIndex_2, Inventories[InventaireSouris]))
+                if (AreItemsOfSameTypeAndAreStackable(indexOfLastItemDragged, Inventories[lastOverhauledInventory], itemIndex_2, Inventories[InventaireSouris]))
                 {
-                    Debug.Log("Swap entre deux inventaire aveec items même type");
                     AddItemsOfSameType(indexOfLastItemDragged, itemIndex_2, Inventories[lastOverhauledInventory], Inventories[InventaireSouris]);
                 }
                 else
                 {
-                    if (InventaireSouris == null)
+/*                    if (InventaireSouris == null)
                     {
                         DropItem(itemIndex_1, Inventories[InventaireSouris].GetItemAt(itemIndex_1).quantity);
 
-                    }
-                    else
-                    {
+                    }*/
+/*                    else
+                    {*/
                         List<InventoryItem> Inventories1Item = Inventories[lastOverhauledInventory].inventoryItems;
                         List<InventoryItem> Inventories2Item = Inventories[InventaireSouris].inventoryItems;
                         Inventories[InventaireSouris].SwapItemsBetweenInventories(indexOfLastItemDragged, Inventories1Item,
                             itemIndex_2, Inventories2Item);
                         Inventories[lastOverhauledInventory].InformAboutChange();
-                    }
+                    //}
                 }
 
 
@@ -372,12 +381,16 @@ namespace Inventory
                 }
             }
         }
-        public bool AreItemsOfSameType(int itemIndex1, InventorySO inventory1, int itemIndex2, InventorySO inventory2)
+        public bool AreItemsOfSameTypeAndAreStackable(int itemIndex1, InventorySO inventory1, int itemIndex2, InventorySO inventory2)
         {
-
+            
             InventoryItem item1 = inventory1.inventoryItems[itemIndex1];
             InventoryItem item2 = inventory2.inventoryItems[itemIndex2];
-            return item1.item == item2.item;
+            if (item1.item.IsStackable)
+            {
+                return item1.item == item2.item;
+            }
+            return item1.item.IsStackable;
         }
 
         private void HandleDragging(int itemIndex)
@@ -396,9 +409,15 @@ namespace Inventory
               inventoryUI.CreateDraggedItem(inventoryItem.item.ItemImage, inventoryItem.quantity);*/
         }
 
+        private void RemoveQuantityItem(InventorySO inventory, int itemIndex, int removedQuantity)
+        {
+            inventory.inventoryItems[itemIndex] = inventory.inventoryItems[itemIndex].ChangeQuantity(inventory.inventoryItems[itemIndex].quantity - removedQuantity);
+            inventory.AddItem(inventory.inventoryItems[itemIndex].item, removedQuantity);
+        }
+
         public void inventory(InputAction.CallbackContext context)
         {
-            if (context.performed)
+            if (context.performed && !ShopPanel.activeSelf)
             {
                 foreach (var inventory in Inventories)
                 {
@@ -432,6 +451,13 @@ namespace Inventory
             }
         }
 
+        public void HideInventory(InputAction.CallbackContext context)
+        {
+            if (context.performed && inventoryUI.isActiveAndEnabled)
+            {
+                inventoryUI.Hide();
+            }
+        }
 
         public void OnScroll(InputAction.CallbackContext context)
         {
@@ -441,12 +467,12 @@ namespace Inventory
                 {
                     if (context.ReadValue<float>() > 0f)
                     {
-                        Debug.Log("Scroll Up");
+                        /*Debug.Log("Scroll Up");*/
                         lastItemSelected += 1;
                     }
                     if (context.ReadValue<float>() < 0f)
                     {
-                        Debug.Log("Scroll Down");
+                        /*Debug.Log("Scroll Down");*/
                         lastItemSelected -= 1;
                     }
                     if (lastItemSelected < 0)
@@ -519,12 +545,14 @@ namespace Inventory
         {
             _playerInput.Player.Inventory.Enable();
             _playerInput.Player.MouseScrollY.Enable();
+            _playerInput.Player.Escape.Enable();
         }
 
         private void OnDisable()
         {
             _playerInput.Player.Inventory.Disable();
             _playerInput.Player.MouseScrollY.Disable();
+            _playerInput.Player.Escape.Disable();
 
         }
 

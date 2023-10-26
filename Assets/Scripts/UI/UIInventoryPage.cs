@@ -159,7 +159,11 @@ namespace Inventory.UI
         {
             DeselectAllItems();
             listOfUIItems[itemIndex].Select();
-            Debug.Log(description);
+            if (description != null)
+            {
+                Debug.Log(description);
+            }
+           
         }
 
         internal void ResetAllItems()
