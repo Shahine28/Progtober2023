@@ -51,7 +51,7 @@ namespace Inventory.Model
             => inventoryItems.Where(item => item.IsEmpty).Any() == false; 
 
 
-        private int AddItemToFirstFreeSlot(LootFortune item, int quantity, List<ItemParameter> itemState = null)
+        public int AddItemToFirstFreeSlot(LootFortune item, int quantity, List<ItemParameter> itemState = null)
         {
             InventoryItem newItem = new InventoryItem
             {
@@ -177,6 +177,7 @@ namespace Inventory.Model
 
         public InventoryItem ChangeQuantity(int newQuantity)
         {
+            /*Debug.Log("Quantity Changed");*/
             return new InventoryItem
             {
                 item = this.item,

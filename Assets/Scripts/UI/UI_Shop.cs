@@ -70,22 +70,31 @@ public class UI_Shop : MonoBehaviour
     {
         for (int i = 0; i < itemSold.Count; i++)
         {
-            if (itemSold[i].isEquipable)
+            if (itemSold[i].hasItemAction)
             {
-                CreateItemButton(itemSold[i].dataItemStuff.lootSprite,
-                    itemSold[i].dataItemStuff.lootName, itemSold[i].priceItem, i, itemSold[i].dataItemStuff);
+                if (itemSold[i].isEquipable)
+                {
+                    CreateItemButton(itemSold[i].dataItemStuff.lootSprite,
+                        itemSold[i].dataItemStuff.lootName, itemSold[i].priceItem, i, itemSold[i].dataItemStuff);
+                }
+                if (!itemSold[i].isEquipable)
+                {
+                    CreateItemButton(itemSold[i].dataItemFood.lootSprite,
+                        itemSold[i].dataItemFood.lootName, itemSold[i].priceItem, i, itemSold[i].dataItemFood);
+                }
             }
-            if (!itemSold[i].isEquipable)
+            else
             {
-                CreateItemButton(itemSold[i].dataItemFood.lootSprite,
-                    itemSold[i].dataItemFood.lootName, itemSold[i].priceItem, i, itemSold[i].dataItemFood);
+                CreateItemButton(itemSold[i].dataItem.lootSprite,
+                        itemSold[i].dataItem.lootName, itemSold[i].priceItem, i, itemSold[i].dataItem);
             }
+
         }
     }
     #region Show/Hide
     public void Show()
     {
-        Debug.Log(GameObject.FindGameObjectWithTag("Player").GetComponent<InventoryController>().MainInventoryPanel.activeSelf);
+        /*Debug.Log(GameObject.FindGameObjectWithTag("Player").GetComponent<InventoryController>().MainInventoryPanel.activeSelf);*/
         if (!GameObject.FindGameObjectWithTag("Player").GetComponent<InventoryController>().MainInventoryPanel.activeSelf)
         {
             // Inverse l'état de visibilité de shopParent
@@ -123,14 +132,31 @@ public class UI_Shop : MonoBehaviour
 [Serializable]
 public struct ItemShop
 {
-    
+    public bool hasItemAction;
+    [SerializeField]
+
+
+    [HideIf("hasItemAction")]
+    [AllowNesting]
+    public LootFortune dataItem;
+
+
+    [ShowIf("hasItemAction")]
+    [AllowNesting]
     public bool isEquipable;
-    [ShowIf("isEquipable")]
+    private bool isEquipableInverse
+    {
+        get { return !isEquipable; }
+    }
+
+    [ShowIf(EConditionOperator.And, "isEquipable", "hasItemAction")]
     [AllowNesting]
     public EquipableItemSo dataItemStuff;
-    [HideIf("isEquipable")]
+
+    [ShowIf(EConditionOperator.And, "isEquipableInverse", "hasItemAction")]
     [AllowNesting]
     public EdibleItemSO dataItemFood;
+
     public int priceItem;
 
 }

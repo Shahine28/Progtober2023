@@ -116,6 +116,15 @@ public partial class @InputGame: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Sprint"",
+                    ""type"": ""Button"",
+                    ""id"": ""42a47e32-c810-43ee-9276-10e968338f5e"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -413,6 +422,17 @@ public partial class @InputGame: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""Keyboard&Mouse"",
                     ""action"": ""SplitQuantity"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c4472d70-69d0-4ee9-bc34-c3cfac0ede97"",
+                    ""path"": ""<Keyboard>/leftShift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Sprint"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1010,6 +1030,7 @@ public partial class @InputGame: IInputActionCollection2, IDisposable
         m_Player_Escape = m_Player.FindAction("Escape", throwIfNotFound: true);
         m_Player_Submit = m_Player.FindAction("Submit", throwIfNotFound: true);
         m_Player_SplitQuantity = m_Player.FindAction("SplitQuantity", throwIfNotFound: true);
+        m_Player_Sprint = m_Player.FindAction("Sprint", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1093,6 +1114,7 @@ public partial class @InputGame: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Escape;
     private readonly InputAction m_Player_Submit;
     private readonly InputAction m_Player_SplitQuantity;
+    private readonly InputAction m_Player_Sprint;
     public struct PlayerActions
     {
         private @InputGame m_Wrapper;
@@ -1107,6 +1129,7 @@ public partial class @InputGame: IInputActionCollection2, IDisposable
         public InputAction @Escape => m_Wrapper.m_Player_Escape;
         public InputAction @Submit => m_Wrapper.m_Player_Submit;
         public InputAction @SplitQuantity => m_Wrapper.m_Player_SplitQuantity;
+        public InputAction @Sprint => m_Wrapper.m_Player_Sprint;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -1146,6 +1169,9 @@ public partial class @InputGame: IInputActionCollection2, IDisposable
             @SplitQuantity.started += instance.OnSplitQuantity;
             @SplitQuantity.performed += instance.OnSplitQuantity;
             @SplitQuantity.canceled += instance.OnSplitQuantity;
+            @Sprint.started += instance.OnSprint;
+            @Sprint.performed += instance.OnSprint;
+            @Sprint.canceled += instance.OnSprint;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -1180,6 +1206,9 @@ public partial class @InputGame: IInputActionCollection2, IDisposable
             @SplitQuantity.started -= instance.OnSplitQuantity;
             @SplitQuantity.performed -= instance.OnSplitQuantity;
             @SplitQuantity.canceled -= instance.OnSplitQuantity;
+            @Sprint.started -= instance.OnSprint;
+            @Sprint.performed -= instance.OnSprint;
+            @Sprint.canceled -= instance.OnSprint;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -1372,6 +1401,7 @@ public partial class @InputGame: IInputActionCollection2, IDisposable
         void OnEscape(InputAction.CallbackContext context);
         void OnSubmit(InputAction.CallbackContext context);
         void OnSplitQuantity(InputAction.CallbackContext context);
+        void OnSprint(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {

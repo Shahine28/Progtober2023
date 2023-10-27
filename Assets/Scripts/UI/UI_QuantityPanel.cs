@@ -1,3 +1,4 @@
+using Inventory;
 using Inventory.Model;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,6 +16,8 @@ public class UI_QuantityPanel : MonoBehaviour
 
     private InputGame _playerInput;
     public InventoryItem item;
+    public InventorySO inventoryItemSplit;
+    public int itemIndex;
 
     private void Awake()
     {
@@ -88,8 +91,9 @@ public class UI_QuantityPanel : MonoBehaviour
 
     public void Submit(InputAction.CallbackContext context)
     {
-        if (context.performed)
+        if (context.performed && transform.parent.gameObject.activeSelf)
         {
+            GameObject.FindGameObjectWithTag("Player").GetComponent<InventoryController>().RemoveQuantityItem(inventoryItemSplit, itemIndex, quantity);
             transform.parent.gameObject.SetActive(false);
         }
     }

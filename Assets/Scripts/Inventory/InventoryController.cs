@@ -51,6 +51,9 @@ namespace Inventory
         // Gestion du drop
         [SerializeField] private GameObject droppedItemPrefab;
 
+        //Gestion du combo de touche
+        private bool shiftCombo;
+
         [Header("Gestion des différents panels")]
         public GameObject MainInventoryPanel;
         public GameObject ShopPanel;
@@ -362,12 +365,12 @@ namespace Inventory
         {
             if (inventory1.GetItemAt(itemIndex_depart).item == inventory2.GetItemAt(itemIndex_arrive).item)
             {
-                Debug.Log("Les deux articles ont le même type, ajoutons-les ensemble.");
+                /*Debug.Log("Les deux articles ont le même type, ajoutons-les ensemble.");*/
                 // Les deux articles ont le même type, ajoutons-les ensemble.
                 int totalQuantity = inventory1.inventoryItems[itemIndex_depart].quantity + inventory2.inventoryItems[itemIndex_arrive].quantity;
                 if (totalQuantity <= inventory1.inventoryItems[itemIndex_depart].item.MaxStackSize)
                 {
-                    Debug.Log(totalQuantity);
+                    /*Debug.Log(totalQuantity);*/
                     // La quantité totale reste dans la limite de la pile.
                     inventory1.inventoryItems[itemIndex_depart] = inventory1.inventoryItems[itemIndex_depart].ChangeQuantity(totalQuantity);
                     inventory2.inventoryItems[itemIndex_arrive] = InventoryItem.GetEmptyItem();// Supprime l'autre article.
@@ -414,16 +417,21 @@ namespace Inventory
               inventoryUI.CreateDraggedItem(inventoryItem.item.ItemImage, inventoryItem.quantity);*/
         }
 
-        private void RemoveQuantityItem(InventorySO inventory, int itemIndex, int removedQuantity)
+        public void RemoveQuantityItem(InventorySO inventory, int itemIndex, int removedQuantity)
         {
-            inventory.inventoryItems[itemIndex] = inventory.inventoryItems[itemIndex].ChangeQuantity(inventory.inventoryItems[itemIndex].quantity - removedQuantity);
-            inventory.AddItem(inventory.inventoryItems[itemIndex].item, removedQuantity);
+            LootFortune item = inventory.inventoryItems[itemIndex].item;
+            int newQuantity = inventory.inventoryItems[itemIndex].quantity - removedQuantity;
+            inventory.inventoryItems[itemIndex] = inventory.inventoryItems[itemIndex].ChangeQuantity(newQuantity);
+            inventory.AddItemToFirstFreeSlot(item, removedQuantity);
+            inventory.InformAboutChange();
         }
         public void Split(InputAction.CallbackContext context)
         {
             if (context.performed && MainInventoryPanel.activeSelf && !Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse].IsEmpty && Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse].item.IsStackable)
             {
                 RemoveQuantityPanel.transform.GetChild(0).GetComponent<UI_QuantityPanel>().item = Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse];
+                RemoveQuantityPanel.transform.GetChild(0).GetComponent<UI_QuantityPanel>().inventoryItemSplit = Inventories[lastInventoryClickedOn];
+                RemoveQuantityPanel.transform.GetChild(0).GetComponent<UI_QuantityPanel>().itemIndex = lastSelectedItemWithMouse;
                 RemoveQuantityPanel.transform.GetChild(0).GetComponent<UI_QuantityPanel>().slider.maxValue = Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse].quantity;
                 RemoveQuantityPanel.SetActive(true);
             }
@@ -463,6 +471,11 @@ namespace Inventory
                 /*Debug.Log("Je relache");*/
             }
         }
+
+/*        public void Left(InputAction.CallbackContext context)
+        {
+            shiftCombo = context.performed;
+        }*/
 
         public void HideInventory(InputAction.CallbackContext context)
         {
@@ -515,27 +528,32 @@ namespace Inventory
 
             List<RaycastResult> results = new List<RaycastResult>();
             EventSystem.current.RaycastAll(pointerData, results);
-
             foreach (var result in results)
             {
-                // Vérifiez si le GameObject possède un composant Image avec Raycast Target activé
-                Image inventoryImage = result.gameObject.GetComponent<Image>();
-
-                if (inventoryImage != null && inventoryImage.raycastTarget)
+                foreach (var inventory in Inventories)
                 {
-                    if (result.gameObject.GetComponent<UIInventoryPage>() != null)
+                    if (result.gameObject.tag == inventory.Key)
                     {
-                        lastInventoryRecorded = result.gameObject.tag;
-                        return result.gameObject.tag;
+                        // Vérifiez si le GameObject possède un composant Image avec Raycast Target activé
+                        Image inventoryImage = result.gameObject.GetComponent<Image>();
+
+                        if (inventoryImage != null && inventoryImage.raycastTarget)
+                        {
+                            if (result.gameObject.GetComponent<UIInventoryPage>() != null)
+                            {
+                                lastInventoryRecorded = result.gameObject.tag;
+                                return result.gameObject.tag;
+                            }
+                            GameObject parent = result.gameObject.transform.parent.gameObject;
+                            while (parent != null && parent.GetComponent<UIInventoryPage>() == null)
+                            {
+                                parent = parent.transform.parent.gameObject;
+                            }
+                            if (parent != null) lastInventoryRecorded = parent.tag;
+                            return parent.tag; // La souris est au-dessus de cet inventaire
+                        }
                     }
-                    GameObject parent = result.gameObject.transform.parent.gameObject;
-                    while (parent != null && parent.GetComponent<UIInventoryPage>() == null)
-                    {
-                        parent = parent.transform.parent.gameObject;
-                    }
-                    if (parent!= null) lastInventoryRecorded = parent.tag;
-                    return parent.tag; // La souris est au-dessus de cet inventaire
-                }
+                }          
             }
 
             return null; // Aucun inventaire actif sous la souris

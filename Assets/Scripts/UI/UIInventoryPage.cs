@@ -117,7 +117,7 @@ namespace Inventory.UI
 
         private void HandleBeginDrag(UIInventoryItem inventoryItemUI)
         {
-            Debug.Log("Swap5");
+            /*Debug.Log("Swap5");*/
             int index = listOfUIItems.IndexOf(inventoryItemUI);
             if (index == -1) return;
             currentlyDraggedItemIndex = index;

@@ -66,7 +66,7 @@ public class InventoryPickUpSystem : MonoBehaviour
 
     public void AddItemFromShop(Item item)
     {
-        Debug.Log("Ajout");
+        /*Debug.Log("Ajout");*/
         int reminder;
         if (!toolbarInventoryData.IsInventoryFull())
         {
