@@ -267,7 +267,18 @@ namespace Inventory
             }
 
             IDestroyableItem destroyableItem = inventoryItem.item as IDestroyableItem;
-            if (destroyableItem != null)
+            if (itemAction == null && destroyableItem != null)
+            {
+                foreach (var inventory in Inventories)
+                {
+                    _inventoryUI[inventory.Value].ResetSelection();
+                }
+                UIinventory.listOfUIItems[itemIndex].Select();
+                lastSelectedItemWithMouse = itemIndex;
+                UIinventory.ShowItemActions(itemIndex);
+                UIinventory.AddAction("Drop", () => DropItem(itemIndex, inventoryItem.quantity));
+            }
+            if (itemAction != null && destroyableItem != null)
             {
                 UIinventory.AddAction("Drop", () => DropItem(itemIndex, inventoryItem.quantity));
             }

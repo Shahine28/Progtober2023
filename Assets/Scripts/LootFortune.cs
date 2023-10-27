@@ -6,8 +6,8 @@ using UnityEngine;
 
 namespace Inventory.Model
 {
-    [CreateAssetMenu(menuName = "ScriptableObject/LootFortune")]
-    public class LootFortune : ScriptableObject
+/*    [CreateAssetMenu(menuName = "ScriptableObject/LootFortune")]*/
+    public abstract class LootFortune : ScriptableObject
     {
         [field: SerializeField] public Sprite lootSprite { get; set; }
         [field: SerializeField] public string lootName { get; set; }

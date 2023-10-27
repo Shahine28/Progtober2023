@@ -138,8 +138,8 @@ public struct ItemShop
 
     [HideIf("hasItemAction")]
     [AllowNesting]
-    public LootFortune dataItem;
-
+    public BaseItemSo dataItem;
+    
 
     [ShowIf("hasItemAction")]
     [AllowNesting]
