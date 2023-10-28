@@ -100,6 +100,7 @@ public class UI_QuantityPanel : MonoBehaviour
 
     private void OnEnable()
     {
+        quantity = 1;
         _playerInput.Player.Escape.Enable();
         _playerInput.Player.Submit.Enable();
     }

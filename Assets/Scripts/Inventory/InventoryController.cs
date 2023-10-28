@@ -1,6 +1,7 @@
 using Inventory.Model;
 using Inventory.UI;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Unity.VisualScripting;
 using UnityEditor;
@@ -202,7 +203,7 @@ namespace Inventory
             lastInventoryClickedOn = InventaireSouris;
             InventoryItem inventoryItem = Inventories[InventaireSouris].GetItemAt(itemIndex);
             UIInventoryPage UIinventory = _inventoryUI[Inventories[InventaireSouris]]; // j'obtiens l'UI relié à mon inventaire
-            if (inventoryItem.IsEmpty)
+            if (inventoryItem.IsEmpty && inventoryUI.isActiveAndEnabled)
             {
                 foreach(var inventory in Inventories)
                 {
@@ -210,15 +211,33 @@ namespace Inventory
                 }
                 return;
             }
-            LootFortune item = inventoryItem.item;
-            string description = PrepareDescription(inventoryItem);
-            if (InventaireSouris == "ToolbarInventory") lastItemSelected = itemIndex;
-            UIinventory.UdpateClick(itemIndex, description);
-            foreach (var UI in _inventoryUI)
+            if (!inventoryItem.IsEmpty)
             {
-                if (UI.Value != UIinventory)
+                LootFortune item = inventoryItem.item;
+                string description = PrepareDescription(inventoryItem);
+                if (InventaireSouris == "ToolbarInventory") lastItemSelected = itemIndex;
+                UIinventory.UdpateClick(itemIndex, description);
+                foreach (var UI in _inventoryUI)
                 {
-                    UI.Value.ResetSelection();
+                    if (UI.Value != UIinventory)
+                    {
+                        UI.Value.ResetSelection();
+                    }
+                }
+                if (shiftCombo)
+                {
+                    if (InventaireSouris == "MainInventory" && inventoryUI.isActiveAndEnabled && !Inventories["ToolbarInventory"].IsInventoryFull())
+                    {
+                        Inventories["ToolbarInventory"].AddItemToFirstFreeSlot(item, inventoryItem.quantity);
+                        Inventories["ToolbarInventory"].InformAboutChange();
+                        Inventories["MainInventory"].RemoveItem(itemIndex, inventoryItem.quantity);
+                    }
+                    else if (InventaireSouris != "MainInventory" && inventoryUI.isActiveAndEnabled && !Inventories["MainInventory"].IsInventoryFull())
+                    {
+                        Inventories["MainInventory"].AddItemToFirstFreeSlot(item, inventoryItem.quantity);
+                        Inventories["MainInventory"].InformAboutChange();
+                        Inventories[InventaireSouris].RemoveItem(itemIndex, inventoryItem.quantity);
+                    }
                 }
             }
 
@@ -414,6 +433,7 @@ namespace Inventory
 
         private void HandleDragging(int itemIndex)
         {
+            if (!inventoryUI.isActiveAndEnabled) return;
             string InventaireSouris = GetActiveInventoryUnderMouseTag();
             lastOverhauledInventory = InventaireSouris;
             InventoryItem inventoryItem = Inventories[InventaireSouris].GetItemAt(itemIndex);
@@ -427,25 +447,92 @@ namespace Inventory
                   return;
               inventoryUI.CreateDraggedItem(inventoryItem.item.ItemImage, inventoryItem.quantity);*/
         }
-
+        public void Shift(InputAction.CallbackContext context)
+        {
+            if (context.started)
+            {
+                shiftCombo = true;
+            }
+            if (context.canceled)
+            {
+                shiftCombo = false;
+            }
+        }
         public void RemoveQuantityItem(InventorySO inventory, int itemIndex, int removedQuantity)
         {
             LootFortune item = inventory.inventoryItems[itemIndex].item;
             int newQuantity = inventory.inventoryItems[itemIndex].quantity - removedQuantity;
-            inventory.inventoryItems[itemIndex] = inventory.inventoryItems[itemIndex].ChangeQuantity(newQuantity);
-            inventory.AddItemToFirstFreeSlot(item, removedQuantity);
-            inventory.InformAboutChange();
+            if (!inventory.IsInventoryFull())
+            {
+                inventory.inventoryItems[itemIndex] = inventory.inventoryItems[itemIndex].ChangeQuantity(newQuantity);
+                inventory.AddItemToFirstFreeSlot(item, removedQuantity);
+                inventory.InformAboutChange();
+            }
+            else if (inventory != Inventories["MainInventory"] && !Inventories["MainInventory"].IsInventoryFull())
+            {
+                inventory.inventoryItems[itemIndex] = inventory.inventoryItems[itemIndex].ChangeQuantity(newQuantity);
+                Inventories["MainInventory"].AddItemToFirstFreeSlot(item, removedQuantity);
+                inventory.InformAboutChange();
+                Inventories["MainInventory"].InformAboutChange();
+            }
+            else if (inventory != Inventories["ToolbarInventory"] && !Inventories["ToolbarInventory"].IsInventoryFull())
+            {
+                inventory.inventoryItems[itemIndex] = inventory.inventoryItems[itemIndex].ChangeQuantity(newQuantity);
+                Inventories["ToolbarInventory"].AddItemToFirstFreeSlot(item, removedQuantity);
+                inventory.InformAboutChange();
+                Inventories["ToolbarInventory"].InformAboutChange();
+            }
+
         }
         public void Split(InputAction.CallbackContext context)
         {
-            if (context.performed && MainInventoryPanel.activeSelf && !Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse].IsEmpty && Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse].item.IsStackable)
+            if (context.performed && MainInventoryPanel.activeSelf && Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse].item.IsStackable && Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse].quantity > 2 && !shiftCombo)
             {
-                RemoveQuantityPanel.transform.GetChild(0).GetComponent<UI_QuantityPanel>().item = Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse];
-                RemoveQuantityPanel.transform.GetChild(0).GetComponent<UI_QuantityPanel>().inventoryItemSplit = Inventories[lastInventoryClickedOn];
-                RemoveQuantityPanel.transform.GetChild(0).GetComponent<UI_QuantityPanel>().itemIndex = lastSelectedItemWithMouse;
-                RemoveQuantityPanel.transform.GetChild(0).GetComponent<UI_QuantityPanel>().slider.maxValue = Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse].quantity;
-                RemoveQuantityPanel.SetActive(true);
+                if (!Inventories[lastInventoryClickedOn].IsInventoryFull())
+                {
+                    RemoveQuantityPanel.transform.GetChild(0).GetComponent<UI_QuantityPanel>().item = Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse];
+                    RemoveQuantityPanel.transform.GetChild(0).GetComponent<UI_QuantityPanel>().inventoryItemSplit = Inventories[lastInventoryClickedOn];
+                    RemoveQuantityPanel.transform.GetChild(0).GetComponent<UI_QuantityPanel>().itemIndex = lastSelectedItemWithMouse;
+                    RemoveQuantityPanel.transform.GetChild(0).GetComponent<UI_QuantityPanel>().slider.maxValue = Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse].quantity;
+                    RemoveQuantityPanel.SetActive(true);
+                }
+                else if (Inventories[lastInventoryClickedOn] != Inventories["MainInventory"] && !Inventories["MainInventory"].IsInventoryFull())
+                {
+                    RemoveQuantityPanel.transform.GetChild(0).GetComponent<UI_QuantityPanel>().item = Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse];
+                    RemoveQuantityPanel.transform.GetChild(0).GetComponent<UI_QuantityPanel>().inventoryItemSplit = Inventories[lastInventoryClickedOn];
+                    RemoveQuantityPanel.transform.GetChild(0).GetComponent<UI_QuantityPanel>().itemIndex = lastSelectedItemWithMouse;
+                    RemoveQuantityPanel.transform.GetChild(0).GetComponent<UI_QuantityPanel>().slider.maxValue = Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse].quantity;
+                    RemoveQuantityPanel.SetActive(true);
+                }
+                else if (Inventories[lastInventoryClickedOn] != Inventories["ToolbarInventory"] && !Inventories["ToolbarInventory"].IsInventoryFull())
+                {
+                    RemoveQuantityPanel.transform.GetChild(0).GetComponent<UI_QuantityPanel>().item = Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse];
+                    RemoveQuantityPanel.transform.GetChild(0).GetComponent<UI_QuantityPanel>().inventoryItemSplit = Inventories[lastInventoryClickedOn];
+                    RemoveQuantityPanel.transform.GetChild(0).GetComponent<UI_QuantityPanel>().itemIndex = lastSelectedItemWithMouse;
+                    RemoveQuantityPanel.transform.GetChild(0).GetComponent<UI_QuantityPanel>().slider.maxValue = Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse].quantity;
+                    RemoveQuantityPanel.SetActive(true);
+                }
+
             }
+            else if (context.performed && MainInventoryPanel.activeSelf && Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse].item.IsStackable && Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse].quantity == 2)
+            {
+                RemoveQuantityItem(Inventories[lastInventoryClickedOn], lastSelectedItemWithMouse, 1);
+            }
+            else if (context.performed && MainInventoryPanel.activeSelf && Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse].item.IsStackable && Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse].quantity > 2 && shiftCombo)
+            {
+                if (Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse].quantity % 2 == 0)
+                {
+                    RemoveQuantityItem(Inventories[lastInventoryClickedOn], lastSelectedItemWithMouse, Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse].quantity/2);
+                }
+                else
+                {
+                    int quantity1 = Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse].quantity / 2;
+                    RemoveQuantityItem(Inventories[lastInventoryClickedOn], lastSelectedItemWithMouse, Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse].quantity - quantity1);
+
+                }
+            }
+
+
         }
         public void inventory(InputAction.CallbackContext context)
         {
@@ -470,8 +557,17 @@ namespace Inventory
                 {
 /*                    activeInventories.Remove("MainInventory");*/
                     inventoryUI.Hide();
-                    string description = PrepareDescription(Inventories["ToolbarInventory"].GetItemAt(0));
-                    inventoryUIBar.UdpateClick(lastItemSelected, description); // Lorsque que la
+                    if (!Inventories["ToolbarInventory"].GetItemAt(lastItemSelected).IsEmpty)
+                    {
+                        string description = PrepareDescription(Inventories["ToolbarInventory"].GetItemAt(lastItemSelected));
+                        inventoryUIBar.UdpateClick(lastItemSelected, description);
+                    }
+                    else
+                    {
+                        string description = PrepareDescription(Inventories["ToolbarInventory"].GetItemAt(0));
+                        inventoryUIBar.UdpateClick(0, description);
+                    }
+
                     inventoryUIIsOpen = false;
                     /*lastItemSelected = 0;*/
                 }
@@ -588,6 +684,7 @@ namespace Inventory
             _playerInput.Player.Inventory.Enable();
             _playerInput.Player.MouseScrollY.Enable();
             _playerInput.Player.Escape.Enable();
+            _playerInput.Player.Sprint.Enable();
         }
 
         private void OnDisable()
@@ -595,6 +692,7 @@ namespace Inventory
             _playerInput.Player.Inventory.Disable();
             _playerInput.Player.MouseScrollY.Disable();
             _playerInput.Player.Escape.Disable();
+            _playerInput.Player.Sprint.Disable();
 
         }
 

@@ -47,7 +47,7 @@ public class UI_Shop : MonoBehaviour
     {
         if (itemButton != null)
         {
-            if (itemButton.prix <= goldCount.Gold)
+            if (itemButton.prix <= goldCount.Gold && inventoryPickUp.AddItemFromShop(itemButton.GetComponent<Item>()))
             {
                 goldCount.Gold -= itemButton.prix;
                 inventoryPickUp.AddItemFromShop(itemButton.GetComponent<Item>());

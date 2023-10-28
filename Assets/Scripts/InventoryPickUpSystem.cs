@@ -64,17 +64,20 @@ public class InventoryPickUpSystem : MonoBehaviour
         }
     }
 
-    public void AddItemFromShop(Item item)
+    public bool AddItemFromShop(Item item)
     {
         /*Debug.Log("Ajout");*/
         int reminder;
         if (!toolbarInventoryData.IsInventoryFull())
         {
             reminder = toolbarInventoryData.AddItem(item.InventoryItem, item.Quantity);
+            return true;
         }
-        else
+        else if (!mainInventoryData.IsInventoryFull())
         {
             reminder = mainInventoryData.AddItem(item.InventoryItem, item.Quantity);
+            return true;
         }
+        return false;
     }
 }
