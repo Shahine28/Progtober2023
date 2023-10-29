@@ -13,9 +13,9 @@ namespace Inventory.Model
 
         public event Action<Dictionary<int, InventoryItem>> OnInventoryUpdated;
 
-        [field: SerializeField] public int Size { get; private set; } = 27;
+        [field: SerializeField] public int Size { get;  set; } = 27;
 
-        InventorySO val = null;
+/*        InventorySO val = null;*/
 
         public void Initialize()
         {

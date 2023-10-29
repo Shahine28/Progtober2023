@@ -15,13 +15,13 @@ namespace Inventory
     public class InventoryController : MonoBehaviour
     {
         // Dictionnaire pour stocker les inventaires actifs
-        private Dictionary<string, InventorySO> Inventories = new Dictionary<string, InventorySO>();
+        [HideInInspector] public Dictionary<string, InventorySO> Inventories = new Dictionary<string, InventorySO>();
 /*        private Dictionary<string, InventorySO> activeInventories = new Dictionary<string, InventorySO>();*/
 
         // Dictionnaire pour stocker l'état de chaque inventaire actif
         private Dictionary<string, Dictionary<int, InventoryItem>> inventoryStates = new Dictionary<string, Dictionary<int, InventoryItem>>();
-
-        private string activeInventoryKey = "ToolbarInventory"; // Inventaire actif par défaut
+/*
+        private string activeInventoryKey = "ToolbarInventory"; // Inventaire actif par défaut*/
 
 
 
@@ -41,8 +41,8 @@ namespace Inventory
 
         private InventorySO initializeInventory;
 
-        private Dictionary<InventorySO, UIInventoryPage> _inventoryUI = new Dictionary<InventorySO, UIInventoryPage>();
-        private Dictionary<InventorySO, List<InventoryItem>> _initialItems = new Dictionary<InventorySO, List<InventoryItem>>();
+        [HideInInspector] public Dictionary<InventorySO, UIInventoryPage> _inventoryUI = new Dictionary<InventorySO, UIInventoryPage>();
+        [HideInInspector] public Dictionary<InventorySO, List<InventoryItem>> _initialItems = new Dictionary<InventorySO, List<InventoryItem>>();
 
         private string lastInventoryRecorded = "ToolBarInventory"; // A utiliser uniquement lorsque je ne peux pas accéder à l'inventaire survolé par ma souris.
         private string lastInventoryClickedOn;
@@ -55,8 +55,12 @@ namespace Inventory
         //Gestion du combo de touche
         private bool shiftCombo;
 
+        // Gestion du chest Inventory Panel
+        private bool chestInventoryIsSet;
+
         [Header("Gestion des différents panels")]
         public GameObject MainInventoryPanel;
+        public GameObject ChestInventoryPanel;
         public GameObject ShopPanel;
         public GameObject RemoveQuantityPanel;
 
@@ -100,8 +104,11 @@ namespace Inventory
                 InventorySO inventoryData = inventoryEntry.Value;
 
                 // Associer le tag du nom de l'inventaire à l'UI correspondante
-                CreateTag(inventoryKey);
-                _inventoryUI[inventoryData].gameObject.tag = inventoryKey;
+                if (inventoryKey == "MainInventory" || inventoryKey == "ToolbarInventory")
+                {
+                    CreateTag(inventoryKey);
+                    _inventoryUI[inventoryData].gameObject.tag = inventoryKey;
+                }
             } // Je crée un tag pour chaque inventaire.
 
         }
@@ -140,23 +147,37 @@ namespace Inventory
                 }*/
 
         private void PrepareInventoryData()
+        {
+            foreach (var inventoryEntry in Inventories)
+            {
+                var inventoryKey = inventoryEntry.Key;
+                var inventoryData = inventoryEntry.Value;
+
+
+                inventoryData.Initialize();
+                inventoryData.OnInventoryUpdated += (state) => UpdateInventoryUI(inventoryKey, state);
+                
+
+                var initialItems = _initialItems[inventoryData];
+                foreach (InventoryItem item in initialItems)
                 {
-                    foreach (var inventoryEntry in Inventories)
-                    {
-                        var inventoryKey = inventoryEntry.Key;
-                        var inventoryData = inventoryEntry.Value;
-
-                        inventoryData.Initialize();
-                        inventoryData.OnInventoryUpdated += (state) => UpdateInventoryUI(inventoryKey, state);
-
-                        var initialItems = _initialItems[inventoryData];
-                        foreach (InventoryItem item in initialItems)
-                        {
-                            if (item.IsEmpty) continue;
-                            inventoryData.AddItem(item);
-                        }
-                    }
+                    if (item.IsEmpty) continue;
+                    inventoryData.AddItem(item);
                 }
+            }
+        }
+
+        public void RefreshInventoryUI(InventorySO inventoryData, UIInventoryPage uiInventory)
+        {
+            uiInventory.ResetAllItems(); // Réinitialise tous les éléments de l'UI de l'inventaire
+
+            foreach (var item in inventoryData.GetCurrentInventoryState())
+            {
+                int itemIndex = item.Key;
+                InventoryItem inventoryItem = item.Value;
+                uiInventory.UdpateData(itemIndex, inventoryItem.item.lootSprite, inventoryItem.quantity);
+            }
+        }
 
         /*        private void UpdateInventoryUI(Dictionary<int, InventoryItem> inventoryState)
                 {
@@ -187,7 +208,15 @@ namespace Inventory
             foreach (var inventory in Inventories)
             {
                 UIInventoryPage UIinventory = _inventoryUI[inventory.Value];
-                UIinventory.InitializeInventoryUI(inventory.Value.Size);
+                if (inventory.Key != "MainInventory" && inventory.Key != "ToolbarInventory" && !chestInventoryIsSet)
+                {
+                    UIinventory.InitializeInventoryUI(inventory.Value.Size);
+                    chestInventoryIsSet = true;
+                }
+                else if (inventory.Key == "MainInventory" || inventory.Key == "ToolbarInventory")
+                {
+                    UIinventory.InitializeInventoryUI(inventory.Value.Size);
+                }
                 UIinventory.OnItemClicked += HandleItemClick;
                 UIinventory.OnStartDragging += HandleDragging;
                 UIinventory.OnSwapItems += HandleSwapItems;
@@ -226,10 +255,16 @@ namespace Inventory
                 }
                 if (shiftCombo)
                 {
-                    if (InventaireSouris == "MainInventory" && inventoryUI.isActiveAndEnabled && !Inventories["ToolbarInventory"].IsInventoryFull())
+                    if (InventaireSouris == "MainInventory" && inventoryUI.isActiveAndEnabled && !Inventories["ToolbarInventory"].IsInventoryFull() && !ChestInventoryPanel.activeSelf)
                     {
                         Inventories["ToolbarInventory"].AddItemToFirstFreeSlot(item, inventoryItem.quantity);
                         Inventories["ToolbarInventory"].InformAboutChange();
+                        Inventories["MainInventory"].RemoveItem(itemIndex, inventoryItem.quantity);
+                    }
+                    if (InventaireSouris == "MainInventory" && inventoryUI.isActiveAndEnabled && !Inventories["ToolbarInventory"].IsInventoryFull() && ChestInventoryPanel.activeSelf)
+                    {
+                        Inventories[ChestInventoryPanel.tag].AddItemToFirstFreeSlot(item, inventoryItem.quantity);
+                        Inventories[ChestInventoryPanel.tag].InformAboutChange();
                         Inventories["MainInventory"].RemoveItem(itemIndex, inventoryItem.quantity);
                     }
                     else if (InventaireSouris != "MainInventory" && inventoryUI.isActiveAndEnabled && !Inventories["MainInventory"].IsInventoryFull())
@@ -536,7 +571,19 @@ namespace Inventory
         }
         public void inventory(InputAction.CallbackContext context)
         {
-            if (context.performed && !ShopPanel.activeSelf)
+            if (context.performed)
+            {
+                InventoryShow();
+            }
+            else if (context.canceled)
+            {
+                /*Debug.Log("Je relache");*/
+            }
+        }
+
+        public void InventoryShow()
+        {
+            if (!ShopPanel.activeSelf)
             {
                 foreach (var inventory in Inventories)
                 {
@@ -545,7 +592,7 @@ namespace Inventory
                 /*Debug.Log("J'appuie");*/
                 if (!inventoryUI.isActiveAndEnabled)
                 {
-/*                    activeInventories.Add("MainInventory", mainInventoryData);*/
+                    /*                    activeInventories.Add("MainInventory", mainInventoryData);*/
                     inventoryUI.Show();
                     inventoryUIIsOpen = true;
                     foreach (var item in mainInventoryData.GetCurrentInventoryState())
@@ -555,7 +602,7 @@ namespace Inventory
                 }
                 else
                 {
-/*                    activeInventories.Remove("MainInventory");*/
+                    /*                    activeInventories.Remove("MainInventory");*/
                     inventoryUI.Hide();
                     if (!Inventories["ToolbarInventory"].GetItemAt(lastItemSelected).IsEmpty)
                     {
@@ -572,10 +619,6 @@ namespace Inventory
                     /*lastItemSelected = 0;*/
                 }
 
-            }
-            else if (context.canceled)
-            {
-                /*Debug.Log("Je relache");*/
             }
         }
 
@@ -696,7 +739,7 @@ namespace Inventory
 
         }
 
-        public static void CreateTag(string tagName)
+        public void CreateTag(string tagName)
         {
             SerializedObject tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
             SerializedProperty tagsProp = tagManager.FindProperty("tags");

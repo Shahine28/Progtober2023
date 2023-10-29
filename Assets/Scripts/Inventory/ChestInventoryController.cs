@@ -1,0 +1,143 @@
+using Inventory;
+using Inventory.Model;
+using Inventory.UI;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+public class ChestInventoryController : MonoBehaviour
+{
+    [SerializeField] private InventorySO inventoryModel;
+    [SerializeField] private InventorySO inventory;
+    [SerializeField] private UIInventoryPage inventoryUI;
+    public List<InventoryItem> initialItems = new List<InventoryItem>();
+    private InventoryController inventoryController;
+    private InputGame _playerInput;
+    private string gameObjectName;
+    private void Awake()
+    {
+        inventoryUI = GameObject.FindGameObjectWithTag("UIInventoryChest").GetComponent<UIInventoryPage>();
+        _playerInput = new InputGame();
+    }
+    void Start()
+    {
+        GameObject.FindGameObjectWithTag("UIInventoryChest")?.SetActive(false);
+        gameObjectName = "Coffre" + GetInstanceID();
+        gameObject.name = gameObjectName;
+        inventoryController = GameObject.FindGameObjectWithTag("Player").GetComponent<InventoryController>();
+
+        CreateInventory();
+        AddInventoryToInventoryController();
+        inventoryController.CreateTag(inventory.name);
+        
+    }
+
+    
+    void Update()
+    {
+        
+    }
+
+    #region CreateInventory/DeleteInventory
+    void CreateInventory()
+    {
+        string path = "Assets/ScriptableObject/ChestInventories/" + "Inventory" + GetInstanceID().ToString() + ".asset";
+        if (File.Exists(path))
+        {
+            inventory = AssetDatabase.LoadAssetAtPath<InventorySO>(path);
+            Debug.LogWarning("Le Scriptable Object existe déjà sous le nom" + " Inventory" + GetInstanceID().ToString()+".");
+            return; // Ne crée pas de nouveau SO s'il existe déjà.
+        }
+        inventory = Instantiate(inventoryModel);
+
+        // Modifiez le nom de la nouvelle instance
+        inventory.name = "Inventory" + GetInstanceID().ToString();
+        inventory.Size = 36;
+
+        // Assurez-vous que les modifications sont enregistrées
+        AssetDatabase.CreateAsset(inventory, path);
+
+        Debug.Log("Nouvel inventaire créé : " + inventory.name);
+    }
+
+    public void DeleteInventory()
+    {
+        string path = "Assets/ScriptableObject/ChestInventories/" + "Inventory" + GetInstanceID().ToString() + ".asset";
+        // Supprimez le Scriptable Object.
+        AssetDatabase.DeleteAsset(path);
+        AssetDatabase.Refresh();
+        Debug.Log("InventorySO supprimé avec succès : " + path);
+    }
+    #endregion
+    void AddInventoryToInventoryController()
+    {
+        inventoryController.Inventories.Add(inventory.name, inventory);
+        inventoryController._inventoryUI.Add(inventory, inventoryUI);
+        inventoryController._initialItems.Add(inventory, initialItems);
+    }
+    #region Show/Hide
+    public void Show()
+    {
+        if (!inventoryController.MainInventoryPanel.activeSelf)
+        {
+            if (!inventoryUI.gameObject.activeSelf)
+            {
+                inventoryController.InventoryShow();
+                if (inventoryController.MainInventoryPanel.activeSelf)
+                {
+                    inventoryUI.gameObject.tag = inventory.name;
+                    inventoryController.RefreshInventoryUI(inventoryController.Inventories[inventory.name], inventoryController._inventoryUI[inventoryController.Inventories[inventory.name]]);
+                    inventoryUI.gameObject.SetActive(true);
+                    if (!inventoryUI.gameObject.activeSelf)
+                    {
+                        inventoryUI.gameObject.tag = inventory.name;
+                        inventoryUI.gameObject.SetActive(true); // Il y'a un bug qui fait qu'au start je dois l'activer 2 fois. Solution temporraire !!!
+                    }
+                }
+            }
+            else
+            {
+                inventoryController.InventoryShow();
+                if (!inventoryController.MainInventoryPanel.activeSelf)
+                {
+                    inventoryUI.gameObject.SetActive(false);
+                }
+            }
+
+        }
+    }
+
+    public void Hide()
+    {
+        if (inventoryController.MainInventoryPanel.activeSelf)
+        {
+            inventoryController.InventoryShow();
+            inventoryUI.gameObject.SetActive(false);
+        }
+    }
+    public void HideInventory(InputAction.CallbackContext context)
+    {
+        if (context.performed && inventoryUI.gameObject.activeSelf)
+        {
+            Hide();
+        }
+    }
+    #endregion
+
+    #region OnEnable/OnDisable
+    private void OnEnable()
+    {
+        _playerInput.Player.Escape.Enable();
+    }
+
+    private void OnDisable()
+    {
+        _playerInput.Player.Escape.Disable();
+    }
+    #endregion
+
+
+}

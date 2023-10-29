@@ -10,6 +10,7 @@ TagManager:
   - CheckPoint
   - Item
   - ShopPanel
+  - UIInventoryChest
   layers:
   - Default
   - TransparentFX
