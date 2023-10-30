@@ -95,6 +95,10 @@ namespace Inventory
             {
                 Debug.Log("Pas bien");
             }
+            foreach (var inventory in Inventories)
+            {
+                Debug.Log(inventory.Key);
+            }
             PrepareUI();
             PrepareInventoryData();
 
@@ -157,7 +161,7 @@ namespace Inventory
                 var inventoryKey = inventoryEntry.Key;
                 var inventoryData = inventoryEntry.Value;
 
-                Debug.Log(inventoryKey);
+/*                Debug.Log(inventoryKey);*/
                 inventoryData.Initialize();
                 inventoryData.OnInventoryUpdated += (state) => UpdateInventoryUI(inventoryKey, state);
                 
@@ -168,6 +172,23 @@ namespace Inventory
                     if (item.IsEmpty) continue;
                     inventoryData.AddItem(item);
                 }
+            }
+        }
+        public void PrepareInventoryDataChest(InventorySO inventoryEntry)
+        {
+            var inventoryKey = inventoryEntry.name;
+            var inventoryData = inventoryEntry;
+
+/*            Debug.Log(inventoryKey)*/;
+            inventoryData.Initialize();
+            inventoryData.OnInventoryUpdated += (state) => UpdateInventoryUI(inventoryKey, state);
+
+
+            var initialItems = _initialItems[inventoryData];
+            foreach (InventoryItem item in initialItems)
+            {
+                if (item.IsEmpty) continue;
+                inventoryData.AddItem(item);
             }
         }
 
@@ -212,21 +233,31 @@ namespace Inventory
             foreach (var inventory in Inventories)
             {
                 UIInventoryPage UIinventory = _inventoryUI[inventory.Value];
-                if (inventory.Key != "MainInventory" && inventory.Key != "ToolbarInventory" && !chestInventoryIsSet)
-                {
-                    UIinventory.InitializeInventoryUI(inventory.Value.Size);
-                    chestInventoryIsSet = true;
-                }
-                else if (inventory.Key == "MainInventory" || inventory.Key == "ToolbarInventory")
-                {
-                    UIinventory.InitializeInventoryUI(inventory.Value.Size);
-                }
+       
+                UIinventory.InitializeInventoryUI(inventory.Value.Size);
+                
                 UIinventory.OnItemClicked += HandleItemClick;
                 UIinventory.OnStartDragging += HandleDragging;
                 UIinventory.OnSwapItems += HandleSwapItems;
                 UIinventory.OnItemActionRequested += HandleItemActionRequested;
             }
 
+        }
+
+        public void PrepareUIChest(InventorySO inventorySO, UIInventoryPage inventoryUI)
+        {
+            var inventoryKey = inventorySO.name;
+            var inventoryData = inventorySO;
+            UIInventoryPage UIinventory = _inventoryUI[inventorySO];
+            if (!chestInventoryIsSet)
+            {
+                UIinventory.InitializeInventoryUI(inventorySO.Size);
+                chestInventoryIsSet = true;
+            }
+            UIinventory.OnItemClicked += HandleItemClick;
+            UIinventory.OnStartDragging += HandleDragging;
+            UIinventory.OnSwapItems += HandleSwapItems;
+            UIinventory.OnItemActionRequested += HandleItemActionRequested;
         }
 
         private void HandleItemClick(int itemIndex)
@@ -521,13 +552,20 @@ namespace Inventory
                 inventory.InformAboutChange();
                 Inventories["ToolbarInventory"].InformAboutChange();
             }
+            else if (ChestInventoryPanel.activeSelf && inventory != Inventories[lastInventoryClickedOn] && !Inventories[lastInventoryClickedOn].IsInventoryFull())
+            {
+                inventory.inventoryItems[itemIndex] = inventory.inventoryItems[itemIndex].ChangeQuantity(newQuantity);
+                Inventories[lastInventoryClickedOn].AddItemToFirstFreeSlot(item, removedQuantity);
+                inventory.InformAboutChange();
+                Inventories[lastInventoryClickedOn].InformAboutChange();
+            }
 
         }
         public void Split(InputAction.CallbackContext context)
         {
             if (context.performed && MainInventoryPanel.activeSelf && Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse].item.IsStackable && Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse].quantity > 2 && !shiftCombo)
             {
-                if (!Inventories[lastInventoryClickedOn].IsInventoryFull())
+                if (ChestInventoryPanel.activeSelf && !Inventories[lastInventoryClickedOn].IsInventoryFull())
                 {
                     RemoveQuantityPanel.transform.GetChild(0).GetComponent<UI_QuantityPanel>().item = Inventories[lastInventoryClickedOn].inventoryItems[lastSelectedItemWithMouse];
                     RemoveQuantityPanel.transform.GetChild(0).GetComponent<UI_QuantityPanel>().inventoryItemSplit = Inventories[lastInventoryClickedOn];

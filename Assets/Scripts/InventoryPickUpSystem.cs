@@ -64,20 +64,14 @@ public class InventoryPickUpSystem : MonoBehaviour
         }
     }
 
-    public bool AddItemFromShop(Item item)
+    public void AddItemFromShop(Item item)
     {
         /*Debug.Log("Ajout");*/
         int reminder;
-        if (!toolbarInventoryData.IsInventoryFull())
+        reminder = toolbarInventoryData.AddItem(item.InventoryItem, item.Quantity);
+        if (reminder > 0)
         {
-            reminder = toolbarInventoryData.AddItem(item.InventoryItem, item.Quantity);
-            return true;
+            mainInventoryData.AddItem(item.InventoryItem, item.Quantity);
         }
-        else if (!mainInventoryData.IsInventoryFull())
-        {
-            reminder = mainInventoryData.AddItem(item.InventoryItem, item.Quantity);
-            return true;
-        }
-        return false;
     }
 }

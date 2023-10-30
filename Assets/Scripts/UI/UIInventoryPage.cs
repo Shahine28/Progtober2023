@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEditor.Progress;
+/*using static UnityEditor.Progress;*/
 
 namespace Inventory.UI
 {

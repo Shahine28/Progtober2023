@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using TMPro;
-using TreeEditor;
+/*using TreeEditor;*/
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -47,10 +47,13 @@ public class UI_Shop : MonoBehaviour
     {
         if (itemButton != null)
         {
-            if (itemButton.prix <= goldCount.Gold && inventoryPickUp.AddItemFromShop(itemButton.GetComponent<Item>()))
+            if (itemButton.prix <= goldCount.Gold)
             {
-                goldCount.Gold -= itemButton.prix;
-                inventoryPickUp.AddItemFromShop(itemButton.GetComponent<Item>());
+                if (!inventoryPickUp.mainInventoryData.IsInventoryFull() || !inventoryPickUp.toolbarInventoryData.IsInventoryFull())
+                {
+                    goldCount.Gold -= itemButton.prix;
+                    inventoryPickUp.AddItemFromShop(itemButton.GetComponent<Item>());
+                }
             }
         }
     }

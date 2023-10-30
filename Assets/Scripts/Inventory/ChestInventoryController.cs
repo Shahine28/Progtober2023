@@ -12,7 +12,6 @@ public class ChestInventoryController : MonoBehaviour
 {
     [SerializeField] private InventorySO inventoryModel;
     [SerializeField] private InventorySO inventory;
-    public InventorySO Inventory => inventory;
     [SerializeField] private UIInventoryPage inventoryUI;
     public List<InventoryItem> initialItems = new List<InventoryItem>();
     private InventoryController inventoryController;
@@ -38,8 +37,9 @@ public class ChestInventoryController : MonoBehaviour
         inventoryController = GameObject.FindGameObjectWithTag("Player").GetComponent<InventoryController>();
         inventoryController.chestCount += 1;
         AddInventoryToInventoryController();
-
         inventoryController.CreateTag(inventory.name);
+        inventoryController.PrepareInventoryDataChest(inventory);
+        inventoryController.PrepareUIChest(inventory, inventoryUI);
     }
 
     
@@ -52,12 +52,12 @@ public class ChestInventoryController : MonoBehaviour
     void CreateInventory()
     {
         string path = "Assets/ScriptableObject/ChestInventories/" + "Inventory-" + ID + ".asset";
-        if (File.Exists(path))
+/*        if (File.Exists(path))
         {
             inventory = AssetDatabase.LoadAssetAtPath<InventorySO>(path);
             Debug.LogWarning("Le Scriptable Object existe déjà sous le nom" + " Inventory-" + ID + ".");
             return; // Ne crée pas de nouveau SO s'il existe déjà.
-        }
+        }*/
         inventory = Instantiate(inventoryModel);
 
         // Modifiez le nom de la nouvelle instance
@@ -65,19 +65,19 @@ public class ChestInventoryController : MonoBehaviour
         inventory.Size = 36;
 
         // Assurez-vous que les modifications sont enregistrées
-        AssetDatabase.CreateAsset(inventory, path);
+/*        AssetDatabase.CreateAsset(inventory, path);*/
 
         Debug.Log("Nouvel inventaire créé : " + inventory.name);
     }
 
-    public void DeleteInventory()
+/*    public void DeleteInventory()
     {
         string path = "Assets/ScriptableObject/ChestInventories/" + "Inventory-" + ID + ".asset";
         // Supprimez le Scriptable Object.
         AssetDatabase.DeleteAsset(path);
         AssetDatabase.Refresh();
         Debug.Log("InventorySO supprimé avec succès : " + path);
-    }
+    }*/
     #endregion
     public void AddInventoryToInventoryController()
     {
