@@ -51,7 +51,7 @@ namespace Inventory
         public int lastSelectedItemWithMouse;
 
         //Gestion des tags
-        [SerializeField] private TagManager tagManager;
+/*        [SerializeField] private TagManager tagManager;*/
         
 
         // Gestion du drop
@@ -62,6 +62,7 @@ namespace Inventory
 
         // Gestion du chest Inventory Panel
         private bool chestInventoryIsSet;
+        public bool ChestInventoryIsSet => chestInventoryIsSet;
         public int chestCount;
 
 
@@ -110,7 +111,7 @@ namespace Inventory
                 // Associer le tag du nom de l'inventaire à l'UI correspondante
                 if (inventoryKey == "MainInventory" || inventoryKey == "ToolbarInventory")
                 {
-                    CreateTag(inventoryKey);
+                    /*CreateTag(inventoryKey);*/
                     _inventoryUI[inventoryData].gameObject.GetComponent<TaggedObject>().tagDynamic = inventoryKey;
 
                 }
@@ -248,13 +249,15 @@ namespace Inventory
             UIInventoryPage UIinventory = _inventoryUI[inventorySO];
             if (!chestInventoryIsSet)
             {
-                UIinventory.InitializeInventoryUI(inventorySO.Size);
+
                 chestInventoryIsSet = true;
+                UIinventory.InitializeInventoryUI(inventorySO.Size);
+                UIinventory.OnItemClicked += HandleItemClick;
+                UIinventory.OnStartDragging += HandleDragging;
+                UIinventory.OnSwapItems += HandleSwapItems;
+                UIinventory.OnItemActionRequested += HandleItemActionRequested;
             }
-            UIinventory.OnItemClicked += HandleItemClick;
-            UIinventory.OnStartDragging += HandleDragging;
-            UIinventory.OnSwapItems += HandleSwapItems;
-            UIinventory.OnItemActionRequested += HandleItemActionRequested;
+
         }
 
         private void HandleItemClick(int itemIndex)
@@ -289,18 +292,46 @@ namespace Inventory
                 {
                     if (InventaireSouris == "MainInventory" && inventoryUI.isActiveAndEnabled && !Inventories["ToolbarInventory"].IsInventoryFull() && !ChestInventoryPanel.activeSelf)
                     {
+                        foreach (var itm in Inventories["ToolbarInventory"].inventoryItems.Select((value, i) => new { i, value }))
+                        {
+                            if (itm.value.item == item && itm.value.item.IsStackable)
+                            {
+                                AddItemsOfSameType(itemIndex, itm.i, Inventories[InventaireSouris], Inventories["ToolbarInventory"]);
+                                return;
+                                
+                            }
+                        }
                         Inventories["ToolbarInventory"].AddItemToFirstFreeSlot(item, inventoryItem.quantity);
                         Inventories["ToolbarInventory"].InformAboutChange();
                         Inventories["MainInventory"].RemoveItem(itemIndex, inventoryItem.quantity);
+
                     }
                     if (InventaireSouris == "MainInventory" && inventoryUI.isActiveAndEnabled && !Inventories["ToolbarInventory"].IsInventoryFull() && ChestInventoryPanel.activeSelf)
                     {
-                        Inventories[ChestInventoryPanel.GetComponent<TaggedObject>().tag].AddItemToFirstFreeSlot(item, inventoryItem.quantity);
-                        Inventories[ChestInventoryPanel.GetComponent<TaggedObject>().tag].InformAboutChange();
+                        foreach (var itm in Inventories[ChestInventoryPanel.GetComponent<TaggedObject>().tagDynamic].inventoryItems.Select((value, i) => new { i, value }))
+                        {
+                            if (itm.value.item == item && itm.value.item.IsStackable)
+                            {
+                                AddItemsOfSameType(itemIndex, itm.i, Inventories[InventaireSouris], Inventories[ChestInventoryPanel.GetComponent<TaggedObject>().tagDynamic]);
+                                return;
+
+                            }
+                        }
+                        Inventories[ChestInventoryPanel.GetComponent<TaggedObject>().tagDynamic].AddItemToFirstFreeSlot(item, inventoryItem.quantity);
+                        Inventories[ChestInventoryPanel.GetComponent<TaggedObject>().tagDynamic].InformAboutChange();
                         Inventories["MainInventory"].RemoveItem(itemIndex, inventoryItem.quantity);
                     }
                     else if (InventaireSouris != "MainInventory" && inventoryUI.isActiveAndEnabled && !Inventories["MainInventory"].IsInventoryFull())
                     {
+                        foreach (var itm in Inventories["MainInventory"].inventoryItems.Select((value, i) => new { i, value }))
+                        {
+                            if (itm.value.item == item && itm.value.item.IsStackable)
+                            {
+                                AddItemsOfSameType(itemIndex, itm.i, Inventories[InventaireSouris], Inventories["MainInventory"]);
+                                return;
+
+                            }
+                        }
                         Inventories["MainInventory"].AddItemToFirstFreeSlot(item, inventoryItem.quantity);
                         Inventories["MainInventory"].InformAboutChange();
                         Inventories[InventaireSouris].RemoveItem(itemIndex, inventoryItem.quantity);
@@ -445,11 +476,12 @@ namespace Inventory
                     }*/
 /*                    else
                     {*/
-                        List<InventoryItem> Inventories1Item = Inventories[lastOverhauledInventory].inventoryItems;
-                        List<InventoryItem> Inventories2Item = Inventories[InventaireSouris].inventoryItems;
-                        Inventories[InventaireSouris].SwapItemsBetweenInventories(indexOfLastItemDragged, Inventories1Item,
-                            itemIndex_2, Inventories2Item);
-                        Inventories[lastOverhauledInventory].InformAboutChange();
+                    List<InventoryItem> Inventories1Item = Inventories[lastOverhauledInventory].inventoryItems;
+                    List<InventoryItem> Inventories2Item = Inventories[InventaireSouris].inventoryItems;
+                    Debug.Log(InventaireSouris + " and " + lastOverhauledInventory);
+                    Inventories[InventaireSouris].SwapItemsBetweenInventories(indexOfLastItemDragged, Inventories1Item,
+                        itemIndex_2, Inventories2Item);
+                    Inventories[lastOverhauledInventory].InformAboutChange();
                     //}
                 }
 
@@ -488,10 +520,10 @@ namespace Inventory
         }
         public bool AreItemsOfSameTypeAndAreStackable(int itemIndex1, InventorySO inventory1, int itemIndex2, InventorySO inventory2)
         {
-            
             InventoryItem item1 = inventory1.inventoryItems[itemIndex1];
             InventoryItem item2 = inventory2.inventoryItems[itemIndex2];
-            if (item1.item.IsStackable)
+            if (item1.IsEmpty || item2.IsEmpty) return false;
+            if (item1.item.IsStackable && !item1.IsEmpty)
             {
                 return item1.item == item2.item;
             }
@@ -778,10 +810,10 @@ namespace Inventory
 
         }
 
-        public void CreateTag(string tagName)
+/*        public void CreateTag(string tagName)
         {
             tagManager.CreateTag(tagName);
-        }
+        }*/
 
         /*        public void CreateTag(string tagName)
                 {

@@ -20,7 +20,8 @@ public class ChestInventoryController : MonoBehaviour
     public string ID;
     private void Awake()
     {
-        inventoryUI = GameObject.FindGameObjectWithTag("UIInventoryChest").GetComponent<UIInventoryPage>();
+        inventoryController = GameObject.FindGameObjectWithTag("Player").GetComponent<InventoryController>();
+        inventoryUI = inventoryController.ChestInventoryPanel.GetComponent<UIInventoryPage>();
         _playerInput = new InputGame();
         if (ID == "")
         {
@@ -30,16 +31,15 @@ public class ChestInventoryController : MonoBehaviour
     }
     void Start()
     {
-        GameObject.FindGameObjectWithTag("UIInventoryChest")?.SetActive(false);
+        inventoryUI.gameObject.SetActive(false);
         gameObjectName = "Coffre - " + ID;
         gameObject.name = gameObjectName;
         CreateInventory();
-        inventoryController = GameObject.FindGameObjectWithTag("Player").GetComponent<InventoryController>();
+
         inventoryController.chestCount += 1;
         AddInventoryToInventoryController();
-        inventoryController.CreateTag(inventory.name);
-        inventoryController.PrepareInventoryDataChest(inventory);
-        inventoryController.PrepareUIChest(inventory, inventoryUI);
+/*        inventoryController.CreateTag(inventory.name);*/
+
     }
 
     
@@ -84,6 +84,11 @@ public class ChestInventoryController : MonoBehaviour
         inventoryController.Inventories.Add(inventory.name, inventory);
         inventoryController._inventoryUI.Add(inventory, inventoryUI);
         inventoryController._initialItems.Add(inventory, initialItems);
+        inventoryController.PrepareInventoryDataChest(inventory);
+        if (!inventoryController.ChestInventoryIsSet)
+        {
+            inventoryController.PrepareUIChest(inventory, inventoryUI);
+        }
     }
 
     #region CreateUniquePersistantID

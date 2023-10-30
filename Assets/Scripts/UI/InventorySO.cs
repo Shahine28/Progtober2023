@@ -138,7 +138,7 @@ namespace Inventory.Model
 
         public void SwapItemsBetweenInventories (int itemIndex_1, List<InventoryItem> inventory1Items, int itemIndex_2, List<InventoryItem> inventory2Items)
         {
-            
+            Debug.Log("Swap5" + inventory1Items +"and" + inventory2Items);
             InventoryItem item1 = inventory1Items[itemIndex_1];
             inventory1Items[itemIndex_1] = inventory2Items[itemIndex_2];
             inventory2Items[itemIndex_2] = item1;
