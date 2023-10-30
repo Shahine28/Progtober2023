@@ -71,6 +71,7 @@ public class InventoryPickUpSystem : MonoBehaviour
         reminder = toolbarInventoryData.AddItem(item.InventoryItem, item.Quantity);
         if (reminder > 0)
         {
+            item.Quantity = reminder;
             mainInventoryData.AddItem(item.InventoryItem, item.Quantity);
         }
     }

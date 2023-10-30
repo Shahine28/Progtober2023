@@ -155,12 +155,12 @@ public class ChestInventoryController : MonoBehaviour
                 inventoryController.InventoryShow();
                 if (inventoryController.MainInventoryPanel.activeSelf)
                 {
-                    inventoryUI.gameObject.tag = inventory.name;
+                    inventoryUI.gameObject.GetComponent<TaggedObject>().tagDynamic = inventory.name;
                     inventoryController.RefreshInventoryUI(inventoryController.Inventories[inventory.name], inventoryController._inventoryUI[inventoryController.Inventories[inventory.name]]);
                     inventoryUI.gameObject.SetActive(true);
                     if (!inventoryUI.gameObject.activeSelf)
                     {
-                        inventoryUI.gameObject.tag = inventory.name;
+                        inventoryUI.gameObject.GetComponent<TaggedObject>().tagDynamic = inventory.name;
                         inventoryUI.gameObject.SetActive(true); // Il y'a un bug qui fait qu'au start je dois l'activer 2 fois. Solution temporraire !!!
                     }
                 }

@@ -40,6 +40,7 @@ namespace Inventory
         public List<InventoryItem> initialBarItems = new List<InventoryItem>();
 
         private InventorySO initializeInventory;
+        
 
         [HideInInspector] public Dictionary<InventorySO, UIInventoryPage> _inventoryUI = new Dictionary<InventorySO, UIInventoryPage>();
         [HideInInspector] public Dictionary<InventorySO, List<InventoryItem>> _initialItems = new Dictionary<InventorySO, List<InventoryItem>>();
@@ -48,6 +49,10 @@ namespace Inventory
         private string lastInventoryClickedOn;
         private int lastItemSelected;
         public int lastSelectedItemWithMouse;
+
+        //Gestion des tags
+        [SerializeField] private TagManager tagManager;
+        
 
         // Gestion du drop
         [SerializeField] private GameObject droppedItemPrefab;
@@ -65,7 +70,6 @@ namespace Inventory
         public GameObject ChestInventoryPanel;
         public GameObject ShopPanel;
         public GameObject RemoveQuantityPanel;
-
         private void Awake()
         {
             _playerInput = new InputGame();
@@ -91,14 +95,6 @@ namespace Inventory
             _initialItems.Add(toolbarInventoryData, initialBarItems);
 
 /*            Debug.Log(GetItemsNumber("ToolbarInventory"));*/
-            if (Inventories.Count != chestCount+2)
-            {
-                Debug.Log("Pas bien");
-            }
-            foreach (var inventory in Inventories)
-            {
-                Debug.Log(inventory.Key);
-            }
             PrepareUI();
             PrepareInventoryData();
 
@@ -115,7 +111,8 @@ namespace Inventory
                 if (inventoryKey == "MainInventory" || inventoryKey == "ToolbarInventory")
                 {
                     CreateTag(inventoryKey);
-                    _inventoryUI[inventoryData].gameObject.tag = inventoryKey;
+                    _inventoryUI[inventoryData].gameObject.GetComponent<TaggedObject>().tagDynamic = inventoryKey;
+
                 }
             } // Je crée un tag pour chaque inventaire.
 
@@ -298,8 +295,8 @@ namespace Inventory
                     }
                     if (InventaireSouris == "MainInventory" && inventoryUI.isActiveAndEnabled && !Inventories["ToolbarInventory"].IsInventoryFull() && ChestInventoryPanel.activeSelf)
                     {
-                        Inventories[ChestInventoryPanel.tag].AddItemToFirstFreeSlot(item, inventoryItem.quantity);
-                        Inventories[ChestInventoryPanel.tag].InformAboutChange();
+                        Inventories[ChestInventoryPanel.GetComponent<TaggedObject>().tag].AddItemToFirstFreeSlot(item, inventoryItem.quantity);
+                        Inventories[ChestInventoryPanel.GetComponent<TaggedObject>().tag].InformAboutChange();
                         Inventories["MainInventory"].RemoveItem(itemIndex, inventoryItem.quantity);
                     }
                     else if (InventaireSouris != "MainInventory" && inventoryUI.isActiveAndEnabled && !Inventories["MainInventory"].IsInventoryFull())
@@ -642,7 +639,7 @@ namespace Inventory
                         inventoryUI.UdpateData(item.Key, item.Value.item.lootSprite, item.Value.quantity);
                     }
                 }
-                else
+                else if (!ChestInventoryPanel.activeSelf && inventoryUI.isActiveAndEnabled)
                 {
                     /*                    activeInventories.Remove("MainInventory");*/
                     inventoryUI.Hide();
@@ -724,7 +721,7 @@ namespace Inventory
             {
                 foreach (var inventory in Inventories)
                 {
-                    if (result.gameObject.tag == inventory.Key)
+                    if (result.gameObject.GetComponent<TaggedObject>() != null && result.gameObject.GetComponent<TaggedObject>().tagDynamic == inventory.Key)
                     {
                         // Vérifiez si le GameObject possède un composant Image avec Raycast Target activé
                         Image inventoryImage = result.gameObject.GetComponent<Image>();
@@ -733,16 +730,16 @@ namespace Inventory
                         {
                             if (result.gameObject.GetComponent<UIInventoryPage>() != null)
                             {
-                                lastInventoryRecorded = result.gameObject.tag;
-                                return result.gameObject.tag;
+                                lastInventoryRecorded = result.gameObject.GetComponent<TaggedObject>().tagDynamic;
+                                return result.gameObject.GetComponent<TaggedObject>().tagDynamic;
                             }
                             GameObject parent = result.gameObject.transform.parent.gameObject;
                             while (parent != null && parent.GetComponent<UIInventoryPage>() == null)
                             {
                                 parent = parent.transform.parent.gameObject;
                             }
-                            if (parent != null) lastInventoryRecorded = parent.tag;
-                            return parent.tag; // La souris est au-dessus de cet inventaire
+                            if (parent != null) lastInventoryRecorded = parent.gameObject.GetComponent<TaggedObject>().tagDynamic;
+                            return parent.gameObject.GetComponent<TaggedObject>().tagDynamic; // La souris est au-dessus de cet inventaire
                         }
                     }
                 }          
@@ -783,32 +780,37 @@ namespace Inventory
 
         public void CreateTag(string tagName)
         {
-            SerializedObject tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
-            SerializedProperty tagsProp = tagManager.FindProperty("tags");
-
-            // Vérifiez si le tag existe déjà
-            bool tagExists = false;
-            for (int i = 0; i < tagsProp.arraySize; i++)
-            {
-                SerializedProperty tag = tagsProp.GetArrayElementAtIndex(i);
-                if (tag.stringValue == tagName)
-                {
-                    tagExists = true;
-                    break;
-                }
-            }
-
-            if (!tagExists)
-            {
-                // Ajoutez un nouveau tag
-                int newIndex = tagsProp.arraySize;
-                tagsProp.InsertArrayElementAtIndex(newIndex);
-                SerializedProperty newTag = tagsProp.GetArrayElementAtIndex(newIndex);
-                newTag.stringValue = tagName;
-
-                tagManager.ApplyModifiedProperties();
-            }
+            tagManager.CreateTag(tagName);
         }
 
+        /*        public void CreateTag(string tagName)
+                {
+                    SerializedObject tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
+                    SerializedProperty tagsProp = tagManager.FindProperty("tags");
+
+                    // Vérifiez si le tag existe déjà
+                    bool tagExists = false;
+                    for (int i = 0; i < tagsProp.arraySize; i++)
+                    {
+                        SerializedProperty tag = tagsProp.GetArrayElementAtIndex(i);
+                        if (tag.stringValue == tagName)
+                        {
+                            tagExists = true;
+                            break;
+                        }
+                    }
+
+                    if (!tagExists)
+                    {
+                        // Ajoutez un nouveau tag
+                        int newIndex = tagsProp.arraySize;
+                        tagsProp.InsertArrayElementAtIndex(newIndex);
+                        SerializedProperty newTag = tagsProp.GetArrayElementAtIndex(newIndex);
+                        newTag.stringValue = tagName;
+
+                        tagManager.ApplyModifiedProperties();
+                    }
+                }
+        */
     }
 }
