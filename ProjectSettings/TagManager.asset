@@ -11,6 +11,7 @@ TagManager:
   - Item
   - ShopPanel
   - UIInventoryChest
+  - Chest
   layers:
   - Default
   - TransparentFX

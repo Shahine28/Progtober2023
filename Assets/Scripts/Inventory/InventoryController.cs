@@ -57,6 +57,8 @@ namespace Inventory
 
         // Gestion du chest Inventory Panel
         private bool chestInventoryIsSet;
+        public int chestCount;
+
 
         [Header("Gestion des différents panels")]
         public GameObject MainInventoryPanel;
@@ -72,7 +74,7 @@ namespace Inventory
 
         private void Start()
         {
-           
+            chestInventoryIsSet = false;
             // Ajoutez les inventaires existants
             Inventories.Add("MainInventory", mainInventoryData);
             Inventories.Add("ToolbarInventory", toolbarInventoryData);
@@ -89,8 +91,10 @@ namespace Inventory
             _initialItems.Add(toolbarInventoryData, initialBarItems);
 
 /*            Debug.Log(GetItemsNumber("ToolbarInventory"));*/
-
-
+            if (Inventories.Count != chestCount+2)
+            {
+                Debug.Log("Pas bien");
+            }
             PrepareUI();
             PrepareInventoryData();
 
@@ -153,7 +157,7 @@ namespace Inventory
                 var inventoryKey = inventoryEntry.Key;
                 var inventoryData = inventoryEntry.Value;
 
-
+                Debug.Log(inventoryKey);
                 inventoryData.Initialize();
                 inventoryData.OnInventoryUpdated += (state) => UpdateInventoryUI(inventoryKey, state);
                 

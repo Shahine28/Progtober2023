@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 4816730209540915285}
   m_Layer: 0
   m_Name: CoffreInventaire
-  m_TagString: Untagged
+  m_TagString: Chest
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -192,3 +192,4 @@ MonoBehaviour:
   inventory: {fileID: 0}
   inventoryUI: {fileID: 0}
   initialItems: []
+  ID: 

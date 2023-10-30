@@ -12,27 +12,34 @@ public class ChestInventoryController : MonoBehaviour
 {
     [SerializeField] private InventorySO inventoryModel;
     [SerializeField] private InventorySO inventory;
+    public InventorySO Inventory => inventory;
     [SerializeField] private UIInventoryPage inventoryUI;
     public List<InventoryItem> initialItems = new List<InventoryItem>();
     private InventoryController inventoryController;
     private InputGame _playerInput;
     private string gameObjectName;
+    public string ID;
     private void Awake()
     {
         inventoryUI = GameObject.FindGameObjectWithTag("UIInventoryChest").GetComponent<UIInventoryPage>();
         _playerInput = new InputGame();
+        if (ID == "")
+        {
+            ID = GetPersitantUniqueID(transform.position.sqrMagnitude, 1);
+        }
+
     }
     void Start()
     {
         GameObject.FindGameObjectWithTag("UIInventoryChest")?.SetActive(false);
-        gameObjectName = "Coffre" + GetInstanceID();
+        gameObjectName = "Coffre - " + ID;
         gameObject.name = gameObjectName;
-        inventoryController = GameObject.FindGameObjectWithTag("Player").GetComponent<InventoryController>();
-
         CreateInventory();
+        inventoryController = GameObject.FindGameObjectWithTag("Player").GetComponent<InventoryController>();
+        inventoryController.chestCount += 1;
         AddInventoryToInventoryController();
+
         inventoryController.CreateTag(inventory.name);
-        
     }
 
     
@@ -44,17 +51,17 @@ public class ChestInventoryController : MonoBehaviour
     #region CreateInventory/DeleteInventory
     void CreateInventory()
     {
-        string path = "Assets/ScriptableObject/ChestInventories/" + "Inventory" + GetInstanceID().ToString() + ".asset";
+        string path = "Assets/ScriptableObject/ChestInventories/" + "Inventory-" + ID + ".asset";
         if (File.Exists(path))
         {
             inventory = AssetDatabase.LoadAssetAtPath<InventorySO>(path);
-            Debug.LogWarning("Le Scriptable Object existe déjà sous le nom" + " Inventory" + GetInstanceID().ToString()+".");
+            Debug.LogWarning("Le Scriptable Object existe déjà sous le nom" + " Inventory-" + ID + ".");
             return; // Ne crée pas de nouveau SO s'il existe déjà.
         }
         inventory = Instantiate(inventoryModel);
 
         // Modifiez le nom de la nouvelle instance
-        inventory.name = "Inventory" + GetInstanceID().ToString();
+        inventory.name = "Inventory-" + ID;
         inventory.Size = 36;
 
         // Assurez-vous que les modifications sont enregistrées
@@ -65,19 +72,79 @@ public class ChestInventoryController : MonoBehaviour
 
     public void DeleteInventory()
     {
-        string path = "Assets/ScriptableObject/ChestInventories/" + "Inventory" + GetInstanceID().ToString() + ".asset";
+        string path = "Assets/ScriptableObject/ChestInventories/" + "Inventory-" + ID + ".asset";
         // Supprimez le Scriptable Object.
         AssetDatabase.DeleteAsset(path);
         AssetDatabase.Refresh();
         Debug.Log("InventorySO supprimé avec succès : " + path);
     }
     #endregion
-    void AddInventoryToInventoryController()
+    public void AddInventoryToInventoryController()
     {
         inventoryController.Inventories.Add(inventory.name, inventory);
         inventoryController._inventoryUI.Add(inventory, inventoryUI);
         inventoryController._initialItems.Add(inventory, initialItems);
     }
+
+    #region CreateUniquePersistantID
+    private string GetPersitantUniqueID(float sqrMagnitude, int startNumber)
+    {
+        string sqrMagnitudeSTR = sqrMagnitude.ToString();
+        string ID = "";
+        foreach (char chara in sqrMagnitudeSTR)
+        {
+            if (chara != ',')
+            {
+                ID += chara;
+            }
+        }
+        if (!DoesIDAlreadyExist(ID))
+        {
+            return ID;
+        }
+        else if (DoesIDAlreadyExist(ID))
+        {
+            int randomNumber = startNumber;
+            string newID = ID + randomNumber.ToString();
+            if (DoesIDAlreadyExist(newID))
+            {
+                GetPersitantUniqueID(sqrMagnitude,startNumber+1);
+                if (!DoesIDAlreadyExist(ID + (startNumber + 1).ToString())) return ID + (startNumber + 1).ToString();
+
+            }
+            else if (!DoesIDAlreadyExist(newID))
+            {
+                ID = newID;
+                return ID;
+            }
+        }
+        return ID + startNumber;
+
+    }
+
+    bool DoesIDAlreadyExist(string ID)
+    {
+        List<string> IDs = new List<string>();
+        foreach(ChestInventoryController chestInventoryController in GameObject.FindObjectsOfType<ChestInventoryController>())
+        {
+            
+            if (chestInventoryController.ID !="")
+            {
+                IDs.Add(chestInventoryController.ID);
+            }
+        }
+        foreach(string id in IDs)
+        {
+            if (id == ID)
+            {
+                return true;
+            }
+        }
+        return false;
+
+    }
+
+    #endregion
     #region Show/Hide
     public void Show()
     {
