@@ -7,12 +7,12 @@ using System.IO;
 [System.Serializable]
 public class TagData
 {
-    public List<string> tags;
+    public List<string> tags =new();
 }
 
 public class TagManager : MonoBehaviour
 {
-    private TagData tagData = new TagData();
+    [SerializeField]private TagData tagData = new TagData();
     private string filePath = "Assets/Json/tags.json"; // Spécifiez le chemin du fichier JSON.
 
     private void Start()
