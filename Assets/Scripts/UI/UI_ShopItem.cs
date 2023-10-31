@@ -17,6 +17,7 @@ public class UI_ShopItem : MonoBehaviour
     private void Start()
     {
         GetComponent<Button>().onClick.AddListener(() => GameObject.FindGameObjectWithTag("ShopPanel").GetComponent<UI_Shop>().BuyItem(this));
+
     }
 
 }

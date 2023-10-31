@@ -6,9 +6,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using TMPro;
+using UnityEditor.ShaderGraph;
 /*using TreeEditor;*/
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class UI_Shop : MonoBehaviour
 {
@@ -47,14 +49,27 @@ public class UI_Shop : MonoBehaviour
     {
         if (itemButton != null)
         {
+            Button button = itemButton.GetComponent<Button>();
+            ColorBlock colors = button.colors;
             if (itemButton.prix <= goldCount.Gold)
             {
-                if (!inventoryPickUp.mainInventoryData.IsInventoryFull() || !inventoryPickUp.toolbarInventoryData.IsInventoryFull())
+                int reminder = inventoryPickUp.AddItemFromShop(itemButton.GetComponent<Item>());
+                if (reminder == 0) 
                 {
                     goldCount.Gold -= itemButton.prix;
-                    inventoryPickUp.AddItemFromShop(itemButton.GetComponent<Item>());
+                    colors.pressedColor = Color.white;
+                    button.colors = colors;
+                    return;
+                }
+                else
+                {
+                    colors.pressedColor = Color.red;
+                    button.colors = colors;
+                    return;
                 }
             }
+            colors.pressedColor = Color.red;
+            button.colors = colors;
         }
     }
 

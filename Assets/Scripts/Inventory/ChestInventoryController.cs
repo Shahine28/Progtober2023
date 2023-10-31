@@ -18,6 +18,9 @@ public class ChestInventoryController : MonoBehaviour
     private InputGame _playerInput;
     private string gameObjectName;
     public string ID;
+    [SerializeField] private bool isFirstChest;
+    public bool IsFirstChest => isFirstChest;
+    private bool firstFrame;
     private void Awake()
     {
         inventoryController = GameObject.FindGameObjectWithTag("Player").GetComponent<InventoryController>();
@@ -31,13 +34,16 @@ public class ChestInventoryController : MonoBehaviour
     }
     void Start()
     {
+        firstFrame = true;
         inventoryUI.gameObject.SetActive(false);
         gameObjectName = "Coffre - " + ID;
         gameObject.name = gameObjectName;
         CreateInventory();
-
         inventoryController.chestCount += 1;
-        AddInventoryToInventoryController();
+        if (isFirstChest)
+        {
+            AddInventoryToInventoryController();
+        }
 /*        inventoryController.CreateTag(inventory.name);*/
 
     }
@@ -45,7 +51,11 @@ public class ChestInventoryController : MonoBehaviour
     
     void Update()
     {
-        
+        if (firstFrame && !isFirstChest)
+        {
+            firstFrame = false;
+            AddInventoryToInventoryController();
+        }
     }
 
     #region CreateInventory/DeleteInventory

@@ -13,6 +13,7 @@ TagManager:
   - UIInventoryChest
   - Chest
   - TagsManager
+  - ChestManager
   layers:
   - Default
   - TransparentFX

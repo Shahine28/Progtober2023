@@ -64,7 +64,7 @@ public class InventoryPickUpSystem : MonoBehaviour
         }
     }
 
-    public void AddItemFromShop(Item item)
+    public int AddItemFromShop(Item item)
     {
         /*Debug.Log("Ajout");*/
         int reminder;
@@ -72,7 +72,8 @@ public class InventoryPickUpSystem : MonoBehaviour
         if (reminder > 0)
         {
             item.Quantity = reminder;
-            mainInventoryData.AddItem(item.InventoryItem, item.Quantity);
+            reminder = mainInventoryData.AddItem(item.InventoryItem, item.Quantity);
         }
+        return reminder;
     }
 }
