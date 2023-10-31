@@ -306,7 +306,7 @@ namespace Inventory
                         Inventories["MainInventory"].RemoveItem(itemIndex, inventoryItem.quantity);
 
                     }
-                    if (InventaireSouris == "MainInventory" && inventoryUI.isActiveAndEnabled && !Inventories["ToolbarInventory"].IsInventoryFull() && ChestInventoryPanel.activeSelf)
+                    if (InventaireSouris == "MainInventory" && inventoryUI.isActiveAndEnabled && !Inventories[ChestInventoryPanel.GetComponent<TaggedObject>().tagDynamic].IsInventoryFull() && ChestInventoryPanel.activeSelf)
                     {
                         foreach (var itm in Inventories[ChestInventoryPanel.GetComponent<TaggedObject>().tagDynamic].inventoryItems.Select((value, i) => new { i, value }))
                         {

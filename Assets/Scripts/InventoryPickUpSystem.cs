@@ -12,6 +12,14 @@ public class InventoryPickUpSystem : MonoBehaviour
     public void HasSpaceToStoreItem(GameObject obj)
     {
         Item item = obj.GetComponent<Item>();
+        foreach(InventoryItem itm in mainInventoryData.inventoryItems)
+        {
+            if (item.InventoryItem == itm.item && (item.Quantity + itm.quantity) <= itm.item.MaxStackSize)
+            {
+                item.hasSpaceToBePickUp = true;
+                return;
+            }
+        }
         if (mainInventoryData.IsInventoryFull())
         {
             item.hasSpaceToBePickUp = false;
@@ -38,30 +46,82 @@ public class InventoryPickUpSystem : MonoBehaviour
     {
         Debug.Log("Ajout");
         int reminder;
-        if (!toolbarInventoryData.IsInventoryFull())
+        bool canStack = false;
+        if (item.InventoryItem.IsStackable)
         {
-            reminder = toolbarInventoryData.AddItem(item.InventoryItem, item.Quantity);
-            if (reminder == 0)
+            foreach (InventoryItem itm in toolbarInventoryData.inventoryItems)
             {
-                StartCoroutine(item.AnimateItemPickup());
+                if (item.InventoryItem == itm.item && (item.Quantity + itm.quantity) <= itm.item.MaxStackSize)
+                {
+                    canStack = true;
+                }
+            }
+            if (!toolbarInventoryData.IsInventoryFull() && canStack)
+            {
+                reminder = toolbarInventoryData.AddItem(item.InventoryItem, item.Quantity);
+                if (reminder == 0)
+                {
+                    StartCoroutine(item.AnimateItemPickup());
+                }
+                else
+                {
+                    item.Quantity = reminder;
+                }
             }
             else
             {
-                item.Quantity = reminder;
+                canStack = false;
+                foreach (InventoryItem itm in mainInventoryData.inventoryItems)
+                {
+                    if (item.InventoryItem == itm.item && (item.Quantity + itm.quantity) <= itm.item.MaxStackSize)
+                    {
+                        canStack = true;
+                    }
+                }
+                if (canStack)
+                {
+                    reminder = mainInventoryData.AddItem(item.InventoryItem, item.Quantity);
+                    if (reminder == 0)
+                    {
+                        StartCoroutine(item.AnimateItemPickup());
+                    }
+                    else
+                    {
+                        item.Quantity = reminder;
+                    }
+                }
             }
         }
         else
         {
-            reminder = mainInventoryData.AddItem(item.InventoryItem, item.Quantity);
-            if (reminder == 0)
+            if (!toolbarInventoryData.IsInventoryFull())
             {
-                StartCoroutine(item.AnimateItemPickup());
+                reminder = toolbarInventoryData.AddItem(item.InventoryItem, item.Quantity);
+                if (reminder == 0)
+                {
+                    StartCoroutine(item.AnimateItemPickup());
+                }
+                else
+                {
+                    item.Quantity = reminder;
+                }
             }
             else
             {
-                item.Quantity = reminder;
+
+                reminder = mainInventoryData.AddItem(item.InventoryItem, item.Quantity);
+                if (reminder == 0)
+                {
+                    StartCoroutine(item.AnimateItemPickup());
+                }
+                else
+                {
+                    item.Quantity = reminder;
+                }
+                
             }
         }
+
     }
 
     public int AddItemFromShop(Item item)
