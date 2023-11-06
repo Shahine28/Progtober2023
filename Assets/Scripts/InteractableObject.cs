@@ -40,7 +40,7 @@ public class InteractableObject : MonoBehaviour
         Collider2D[] zoneInterraction = Physics2D.OverlapCircleAll(transform.position, ZoneInterraction);
         foreach (Collider2D collision in zoneInterraction)
         {
-            if (collision.gameObject.tag == "Player" && collision.isTrigger)
+            if (collision.gameObject.tag == "Player" && collision.isTrigger &&!hasBeenUsed)
             {
                 toucheEInstance.SetActive(true);
             }
