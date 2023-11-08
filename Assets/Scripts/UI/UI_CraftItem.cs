@@ -16,19 +16,22 @@ public class UI_CraftItem : MonoBehaviour, IPointerClickHandler
     public Image borderImage;
     [HideInInspector]
     public int index;
-    
 
+    private CraftSysteme craftSystem;
+    private UI_CraftQuantityPanel quantityPanel;
 
     public event Action<UIInventoryItem> OnItemClicked;
 
     private void Awake()
     {
+        craftSystem = GameObject.FindGameObjectWithTag("CraftPanel").GetComponent<CraftSysteme>();
+        quantityPanel = GameObject.FindGameObjectWithTag("QuantitySelector").GetComponent<UI_CraftQuantityPanel>();
         ResetData();
         Deselect();
     }
     private void Start()
     {
-
+       
     }
 
     public void SetData(Sprite sprite, string name)
@@ -47,16 +50,24 @@ public class UI_CraftItem : MonoBehaviour, IPointerClickHandler
     }
     public void OnPointerClick(PointerEventData pointerData)
     {
-        for (int i = 0; i< gameObject.transform.parent.childCount; i++)
+        if (nameItem != craftSystem.SelectedItem)
         {
-            gameObject.transform.parent.GetChild(i).GetComponent<UI_CraftItem>().Deselect();
+            Debug.Log("Changement d'Item");
+            craftSystem.SelectedItem = nameItem;
+            for (int i = 0; i < gameObject.transform.parent.childCount; i++)
+            {
+                gameObject.transform.parent.GetChild(i).GetComponent<UI_CraftItem>().Deselect();
+            }
+            Select();
         }
-        Select();
     }
 
     public void Select()
     {
+        quantityPanel.ChangeQuantity(1);
         borderImage.enabled = true;
         gameObject.transform.parent.transform.parent.GetComponent<CraftSysteme>().SetData(nameItem);
+        craftSystem.SelectedItem = nameItem;
+
     }
 }

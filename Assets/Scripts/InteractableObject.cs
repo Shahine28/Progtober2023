@@ -15,8 +15,9 @@ public class InteractableObject : MonoBehaviour
     [SerializeField] Vector2 positionToucheE;
     bool toucheEIsPressed;
     GameObject toucheEInstance;
-    [SerializeField] bool isUsed;
-    [SerializeField] bool hasBeenUsed;
+    /*[SerializeField]*/ private bool isUsed;
+    /*[SerializeField]*/ private bool hasBeenUsed;
+    [SerializeField] private bool isASingleUseObject;
     [SerializeField] UnityEvent Event;
     [SerializeField] PlayerInput _playerInput;
     InputAction _toucheE;
@@ -40,9 +41,17 @@ public class InteractableObject : MonoBehaviour
         Collider2D[] zoneInterraction = Physics2D.OverlapCircleAll(transform.position, ZoneInterraction);
         foreach (Collider2D collision in zoneInterraction)
         {
-            if (collision.gameObject.tag == "Player" && collision.isTrigger &&!hasBeenUsed)
+            if (collision.gameObject.tag == "Player" && collision.isTrigger)
             {
-                toucheEInstance.SetActive(true);
+                if (isASingleUseObject && !hasBeenUsed)
+                {
+                    toucheEInstance.SetActive(true);
+                }
+                else if (!isASingleUseObject)
+                {
+                    toucheEInstance.SetActive(true);
+                }
+                
             }
             if (isUsed)
             {

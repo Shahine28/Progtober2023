@@ -7,6 +7,7 @@ public class LootBag : MonoBehaviour
 {
     [SerializeField] private GameObject droppedItemPrefab;
     [SerializeField] List<LootFortune> lootList = new List<LootFortune>();
+    [SerializeField] private Animator animator;
     public 
     // Start is called before the first frame update
     LootFortune GetDroppedItem()
@@ -35,6 +36,7 @@ public class LootBag : MonoBehaviour
         LootFortune droppedItem = GetDroppedItem();
         if (droppedItem != null)
         {
+            animator.SetBool("Open", true);
             GameObject lootGameObject = Instantiate(droppedItemPrefab, transform.position, Quaternion.identity);
             lootGameObject.GetComponent<Item>().InventoryItem = droppedItem;
             lootGameObject.GetComponent<SpriteRenderer>().sprite = droppedItem.lootSprite;

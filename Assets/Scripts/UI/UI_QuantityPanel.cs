@@ -98,6 +98,7 @@ public class UI_QuantityPanel : MonoBehaviour
         }
     }
 
+
     private void OnEnable()
     {
         quantity = 1;

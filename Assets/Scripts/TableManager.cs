@@ -19,5 +19,13 @@ public class TableManager : MonoBehaviour
         totalQuantityRequired.text = "";
     }
 
+    public void ChangeTextColor(Color color)
+    {
+        quantityRequired.color = color;
+        quantitPossed.color = color;
+        requiredItemName.color = color;
+        totalQuantityRequired.color = color;
+    }
+
 
 }

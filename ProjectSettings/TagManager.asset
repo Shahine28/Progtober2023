@@ -15,6 +15,7 @@ TagManager:
   - TagsManager
   - ChestManager
   - CraftPanel
+  - QuantitySelector
   layers:
   - Default
   - TransparentFX

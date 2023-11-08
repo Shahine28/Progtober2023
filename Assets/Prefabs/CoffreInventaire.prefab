@@ -103,8 +103,7 @@ MonoBehaviour:
   ZoneInterraction: 2
   toucheE: {fileID: 4540321753977830797, guid: 870098e6f4ac89f42870455b46b83284, type: 3}
   positionToucheE: {x: 0, y: 1.5}
-  isUsed: 0
-  hasBeenUsed: 0
+  isASingleUseObject: 0
   Event:
     m_PersistentCalls:
       m_Calls:
@@ -193,3 +192,4 @@ MonoBehaviour:
   inventoryUI: {fileID: 0}
   initialItems: []
   ID: 
+  isFirstChest: 0
